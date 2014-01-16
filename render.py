@@ -399,18 +399,10 @@ def write_geometry(bus):
 	VRayScene=    scene.vray
 	VRayExporter= VRayScene.exporter
 
-	# if 'export_nodes' in dir(bpy.ops.vray):
-	# 	# Call V-Ray/Blender custom node export operator
-	# 	bpy.ops.vray.export_nodes(
-	# 		scene    = scene.as_pointer(),
-	# 		filepath = bus['filenames']['nodes'],
-	# 		debug    = VRayExporter.mesh_debug
-	# 	)
-
 	if 'export_meshes' in dir(bpy.ops.vray):
 		# Call V-Ray/Blender custom mesh export operator
 		bpy.ops.vray.export_meshes(
-			filepath          = bus['filenames']['geometry'][:-11],
+			filepath          = bus['filenames']['geometry'],
 			use_active_layers = VRayExporter.mesh_active_layers,
 			use_animation     = VRayExporter.animation and VRayExporter.animation_type == 'FULL',
 			use_instances     = VRayExporter.use_instances,
@@ -544,32 +536,20 @@ def write_settings(bus):
 		if key in ('output', 'output_filename', 'output_loadfile', 'lightmaps', 'scene', 'DR'):
 			# Skip some files
 			continue
-
-		if VRayDR.on and VRayDR.transferAssets == '0':
-			if key == 'geometry':
-				for t in range(threadCount):
-					if PLATFORM == 'win32':
-						ofile.write("\n#include \"//%s/%s/%s/%s_%.2i.vrscene\"" % (HOSTNAME, VRayDR.share_name, bus['filenames']['DR']['sub_dir'], os.path.basename(bus['filenames']['geometry'][:-11]), t))
-					else:
-						ofile.write("\n#include \"%s_%.2i.vrscene\"" % (bus['filenames']['DR']['prefix'] + os.sep + os.path.basename(bus['filenames']['geometry'][:-11]), t))
+		if VRayDR.on and not SettingsOptions.misc_transferAssets:
+			if VRayDR.type == 'WW':
+				ofile.write("\n#include \"//%s/%s/%s/%s\"" % (HOSTNAME, VRayDR.share_name, bus['filenames']['DR']['sub_dir'], os.path.basename(bus['filenames'][key])))
 			else:
-				if PLATFORM == 'win32':
-					ofile.write("\n#include \"//%s/%s/%s/%s\"" % (HOSTNAME, VRayDR.share_name, bus['filenames']['DR']['sub_dir'], os.path.basename(bus['filenames'][key])))
-				else:
-					ofile.write("\n#include \"%s\"" % (bus['filenames']['DR']['prefix'] + os.sep + os.path.basename(bus['filenames'][key])))
+				ofile.write("\n#include \"%s\"" % (bus['filenames']['DR']['prefix'] + os.sep + os.path.basename(bus['filenames'][key])))
 		else:
-			if key == 'geometry':
-				if bus['preview']:
-					ofile.write("\n#include \"%s\"" % os.path.join(get_vray_exporter_path(), "preview", "preview_geometry.vrscene"))
-				else:
-					for t in range(threadCount):
-						ofile.write("\n#include \"%s_%.2i.vrscene\"" % (os.path.basename(bus['filenames']['geometry'][:-11]), t))
-			else:
-				if bus['preview'] and key == 'colorMapping':
+			if bus['preview'] and key in {'colorMapping', 'geometry'}:
+				if key == 'colorMapping':
 					if os.path.exists(bus['filenames'][key]):
 						ofile.write("\n#include \"%s\"" % bus['filenames'][key])
-				else:
-					ofile.write("\n#include \"%s\"" % os.path.basename(bus['filenames'][key]))
+				if key == 'geometry':
+					ofile.write("\n#include \"%s\"" % os.path.join(get_vray_exporter_path(), "preview", "preview_geometry.vrscene"))
+			else:
+				ofile.write("\n#include \"%s\"" % os.path.basename(bus['filenames'][key]))
 	ofile.write("\n")
 
 	if Includer.use:
@@ -1719,6 +1699,8 @@ def write_scene(bus):
 
 		if not checkAnimated:
 			for key in bus['files']:
+				if key in {'geometry'}:
+					continue
 				bus['files'][key].write("\n// End of static data\n")
 
 		debug(scene, "Writing frame {0}... done {1:<64}".format(scene.frame_current, "[%.2f]"%(time.clock() - timer)))

@@ -1251,14 +1251,12 @@ def init_files(bus):
 			f.close()
 
 	for key in ('geometry', 'lights', 'materials', 'textures', 'nodes', 'camera', 'scene', 'environment'):
-		if key == 'geometry':
-			filepath = os.path.join(export_directory, "%s_geometry_00.vrscene" % (export_filename))
+		if key == 'scene' and (VRayDR.on and not SettingsOptions.misc_transferAssets):
+			# Scene file MUST be on top of scene directory
+			filepath = os.path.normpath(os.path.join(export_directory, "..", "%s.vrscene" % (export_filename)))
 		else:
-			if key == 'scene' and (VRayDR.on and VRayDR.transferAssets == '0'):
-				# Scene file MUST be on top of scene directory
-				filepath = os.path.normpath(os.path.join(export_directory, "..", "%s.vrscene" % (export_filename)))
-			else:
-				filepath = os.path.normpath(os.path.join(export_directory, "%s_%s.vrscene" % (export_filename, key)))
+			filepath = os.path.normpath(os.path.join(export_directory, "%s_%s.vrscene" % (export_filename, key)))
+		if key not in {'geometry'}:
 			bus['files'][key] = open(filepath, 'w')
 		bus['filenames'][key] = filepath
 
