@@ -230,17 +230,17 @@ class VRAY_RP_render(VRayRenderPanel, bpy.types.Panel):
 			render_label= "Cameras"
 			render_icon= 'RENDER_ANIMATION'
 		else:
-			render_label= "Image"
+			render_label= "Render Image"
 			render_icon= 'RENDER_STILL'
 
-		col.operator('render.render', text= render_label, icon= render_icon)
+		layout.operator('render.render', text= render_label, icon= render_icon)
 
-		if not VRayExporter.auto_meshes:
-			if wide_ui:
-				col= split.column()
-			col.operator('vray.write_geometry', icon='OUTLINER_OB_MESH')
-
-		layout.operator('vray.write_vrscene_nodes', icon='OBJECT_DATA')
+		split = layout.split()
+		col = split.column()
+		col.operator('vray.write_vrscene_nodes', icon='OBJECT_DATA')
+		if wide_ui:
+			col = split.column()
+		col.operator('vray.write_geometry', icon='OUTLINER_OB_MESH')
 
 		if VRayExporter.animation:
 			layout.prop(VRayExporter, 'animation_type')
