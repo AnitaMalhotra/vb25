@@ -167,10 +167,15 @@ def add_properties(rna_pointer):
 		default= 'FRAMEBYFRAME'
 	)
 
-	VRayExporter.check_animated= BoolProperty(
-		name= "Check animated",
-		description= "Detect animated meshes",
-		default= False
+	VRayExporter.check_animated = EnumProperty(
+		name  = "Check Animated",
+		items = (
+			('NONE',   "None",   "Don't check meshes for animation"),
+			('SIMPLE', "Simple", "Simple check"),
+			('HASH',   "Hash",   "Check mesh data hash"),
+		),
+		description = "Detect animated meshes",
+		default = 'NONE'
 	)
 
 	VRayExporter.use_hair= BoolProperty(

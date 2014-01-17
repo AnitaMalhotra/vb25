@@ -1609,11 +1609,9 @@ def write_scene(bus):
 
 	del exclude_list
 
-	def write_frame(bus, checkAnimated=False):
+	def write_frame(bus, checkAnimated='NONE'):
 		timer= time.clock()
 		scene= bus['scene']
-
-		debug(scene, "Writing frame %i..." % scene.frame_current)
 
 		VRayScene=       scene.vray
 
@@ -1646,7 +1644,7 @@ def write_scene(bus):
 		if VRayExporter.debug:
 			print_dict(scene, "Hide from view", bus['visibility'])
 
-		if not checkAnimated:
+		if checkAnimated == 'NONE':
 			write_settings(bus)
 
 		for ob in bus['objects']:
@@ -1654,9 +1652,8 @@ def write_scene(bus):
 				continue
 
 			# Check if smth on object is animated
-			if checkAnimated:
-				if not is_animated(ob):
-					continue
+			if not is_animated(bus, ob):
+				continue
 
 			debug(scene, "{0}: {1:<32}".format(ob.type, color(ob.name, 'green')), VRayExporter.debug)
 
@@ -1703,7 +1700,7 @@ def write_scene(bus):
 					continue
 				bus['files'][key].write("\n// End of static data\n")
 
-		debug(scene, "Writing frame {0}... done {1:<64}".format(scene.frame_current, "[%.2f]"%(time.clock() - timer)))
+		debug(scene, "Writing frame {0}... done {1}".format(scene.frame_current, "[%.2f]"%(time.clock() - timer)))
 
 	timer= time.clock()
 
@@ -1723,7 +1720,8 @@ def write_scene(bus):
 		# Export full first frame
 		f = scene.frame_start
 		scene.frame_set(f)
-		write_frame(bus)
+		bus['check_animated'] = False
+		write_frame(bus, checkAnimated='NONE')
 		f += scene.frame_step
 
 		# Export the rest of frames checking
@@ -1733,6 +1731,7 @@ def write_scene(bus):
 			if bus['engine'] and bus['engine'].test_break():
 				return
 			scene.frame_set(f)
+			bus['check_animated'] = VRayExporter.check_animated
 			write_frame(bus, checkAnimated=VRayExporter.check_animated)
 			f += scene.frame_step
 
@@ -2078,6 +2077,8 @@ def init_bus(engine, scene, preview = False):
 	# Output files
 	bus['files']=     {}
 	bus['filenames']= {}
+
+	bus['anim'] = {}
 
 	init_files(bus)
 
