@@ -173,6 +173,7 @@ def add_properties(rna_pointer):
 			('NONE',   "None",   "Don't check meshes for animation"),
 			('SIMPLE', "Simple", "Simple check"),
 			('HASH',   "Hash",   "Check mesh data hash"),
+			('BOTH',   "Both",   "Use both methods"),
 		),
 		description = "Detect animated meshes",
 		default = 'NONE'

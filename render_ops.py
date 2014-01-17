@@ -974,15 +974,31 @@ class VRAY_OT_write_geometry(bpy.types.Operator):
 
 
 
-class VRAY_OT_write_vrscene(bpy.types.Operator):
-	bl_idname      = "vray.write_vrscene"
-	bl_label       = "Export Scene"
-	bl_description = "Export scene into a *.vrscene files"
+class VRAY_OT_write_vrscene_nodes(bpy.types.Operator):
+	bl_idname      = "vray.write_vrscene_nodes"
+	bl_label       = "Export Nodes"
+	bl_description = "Export Nodes into a *.vrscene files"
 
 	def execute(self, context):
-		bpy.ops.vray.export_vrscene()
-		return {'FINISHED'}
+		if not hasattr(bpy.ops.vray, 'export_nodes'):
+			return {'CANCELLED'}
 
+		scene = context.scene
+
+		VRayScene    = scene.vray
+		VRayExporter = VRayScene.exporter
+
+		bpy.ops.vray.export_nodes(
+			filepath          = "/tmp/vrayblender_bdancer/scene_nodes.vrscene",
+			use_active_layers = True,
+			use_animation     = VRayExporter.animation,
+			use_instances     = True,
+			debug             = True,
+			check_animated    = VRayExporter.check_animated,
+			scene             = str(scene.as_pointer())
+		)
+
+		return {'FINISHED'}
 
 
 class VRAY_OT_render(bpy.types.Operator):
@@ -1352,6 +1368,7 @@ def GetRegClasses():
 		VRAY_OT_copy_linked_materials,
 		VRayRenderer,
 		VRayRendererPreview,
+		VRAY_OT_write_vrscene_nodes,
 	)
 
 

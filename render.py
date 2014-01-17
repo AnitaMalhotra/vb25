@@ -1652,8 +1652,9 @@ def write_scene(bus):
 				continue
 
 			# Check if smth on object is animated
-			if not is_animated(bus, ob):
-				continue
+			if VRayExporter.animation:
+				if not is_animated(bus, ob):
+					continue
 
 			debug(scene, "{0}: {1:<32}".format(ob.type, color(ob.name, 'green')), VRayExporter.debug)
 
@@ -2078,7 +2079,8 @@ def init_bus(engine, scene, preview = False):
 	bus['files']=     {}
 	bus['filenames']= {}
 
-	bus['anim'] = {}
+	bus['check_animated'] = 'NONE'
+	bus['anim'] = set()
 
 	init_files(bus)
 

@@ -240,6 +240,8 @@ class VRAY_RP_render(VRayRenderPanel, bpy.types.Panel):
 				col= split.column()
 			col.operator('vray.write_geometry', icon='OUTLINER_OB_MESH')
 
+		layout.operator('vray.write_vrscene_nodes', icon='OBJECT_DATA')
+
 		if VRayExporter.animation:
 			layout.prop(VRayExporter, 'animation_type')
 
