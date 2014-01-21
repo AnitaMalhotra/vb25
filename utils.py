@@ -1219,8 +1219,7 @@ def init_files(bus):
 			filepath = os.path.normpath(os.path.join(export_directory, "..", "%s.vrscene" % (export_filename)))
 		else:
 			filepath = os.path.normpath(os.path.join(export_directory, "%s_%s.vrscene" % (export_filename, key)))
-		if key not in {'geometry'}:
-			bus['files'][key] = open(filepath, 'w')
+		bus['files'][key] = open(filepath, 'w')
 		bus['filenames'][key] = filepath
 
 	# Duplicate "Color mapping" setting to a separate file for correct preview

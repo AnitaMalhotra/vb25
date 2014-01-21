@@ -44,6 +44,8 @@ import bpy
 import mathutils
 
 ''' vb modules '''
+import _vray_for_blender
+
 import vb25
 from vb25.lib     import VRayProcess
 from vb25.utils   import *
@@ -1610,6 +1612,88 @@ def write_scene(bus):
 	del exclude_list
 
 	def write_frame(bus, checkAnimated='NONE'):
+		scene = bus['scene']
+
+		VRayScene       = scene.vray
+		SettingsOptions = VRayScene.SettingsOptions
+
+		# Cache stores already exported data
+		bus['cache'] = {}
+		bus['cache']['textures']  = []
+		bus['cache']['materials'] = []
+		bus['cache']['displace']  = []
+		bus['cache']['proxy']     = []
+		bus['cache']['bitmap']    = []
+		bus['cache']['uvwgen']    = {}
+
+		# Camera
+		bus['camera']= scene.camera
+
+		# Write objects and geometry
+		_vray_for_blender.exportScene(
+			bpy.context.as_pointer(),
+			bus['files']['nodes'],
+			bus['files']['geometry'],
+			bus['files']['lights'],
+		)
+
+		timerStart = time.clock()
+
+		# Write settings
+		if checkAnimated == 'NONE':
+			write_settings(bus)
+
+		# Write lights
+		for ob in bpy.context.scene.objects:
+			bus['node'] = {
+				'object'   : ob, # Currently processes object
+				'visible'  : ob, # Object visibility
+				'base'     : ob, # Attributes for particle / dupli export
+				'dupli'    : {},
+				'particle' : {},
+			}
+
+			if ob.type == 'LAMP':
+				write_lamp(bus)
+
+		# Write materials
+		bus['node']['object'] = None
+		for ma in bpy.data.materials:
+			bus['material'] = {}
+			bus['material']['material'] = ma
+
+			if SettingsOptions.mtl_override_on and SettingsOptions.mtl_override:
+				if not ma.vray.dontOverride:
+					bus['material']['material'] = get_data_by_name(scene, 'materials', SettingsOptions.mtl_override)
+
+			# Normal mapping settings pointer
+			bus['material']['normal_slot'] = None
+
+			# Bump mapping settings pointer
+			bus['material']['bump_slot']   = None
+
+			# Set if any texture uses object mapping
+			bus['material']['orco_suffix'] = ""
+
+			write_material(bus)
+
+		# TODO: Add camera animation detection
+		#
+		PLUGINS['CAMERA']['CameraPhysical'].write(bus)
+		PLUGINS['SETTINGS']['BakeView'].write(bus)
+		PLUGINS['SETTINGS']['RenderView'].write(bus)
+		PLUGINS['CAMERA']['CameraStereoscopic'].write(bus)
+
+		# SphereFade could be animated
+		# We already export SphereFade data in settings export,
+		# so skip first frame
+		if checkAnimated:
+			PLUGINS['SETTINGS']['SettingsEnvironment'].WriteSphereFade(bus)
+
+		debug(scene, "Writing lights, materials and settings in %.2f" % (time.clock() - timerStart))
+
+
+	def write_frame_(bus, checkAnimated='NONE'):
 		timer= time.clock()
 		scene= bus['scene']
 
@@ -1646,6 +1730,9 @@ def write_scene(bus):
 
 		if checkAnimated == 'NONE':
 			write_settings(bus)
+
+		if VRayExporter.auto_meshes:
+			write_geometry(bus)
 
 		for ob in bus['objects']:
 			if not object_visible(bus, ob):
@@ -1710,9 +1797,6 @@ def write_scene(bus):
 	if bus['preview']:
 		write_frame(bus)
 		return False
-
-	if VRayExporter.auto_meshes:
-		write_geometry(bus)
 
 	if VRayExporter.animation and VRayExporter.animation_type in {'FULL', 'NOTMESHES'}:
 		# Store current frame

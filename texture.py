@@ -591,8 +591,8 @@ def write_material_textures(bus):
 					if VRayTexture.texture_coords == 'ORCO':
 						bus['material']['orco_suffix']= get_name(get_orco_object(scene, bus['node']['object'], VRayTexture),
 																 prefix='ORCO')
-
-						bus['mtex']['name']+= bus['material']['orco_suffix']
+						if bus['material']['orco_suffix']:
+							bus['mtex']['name']+= bus['material']['orco_suffix']
 
 					if VRayExporter.debug:
 						print_dict(scene, "bus['mtex']", bus['mtex'])
