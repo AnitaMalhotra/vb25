@@ -517,7 +517,7 @@ def debug(scene, message, newline= True, cr= True, error= False):
 	# 	'\n' if newline else '\r' if cr else '')
 	# )
 	sys.stdout.write("%s: %s%s%s" % (
-		color("V-Ray/Blender", 'green'),
+		color("V-Ray For Blender", 'green'),
 		color("Error! ", 'red') if error else '',
 		message,
 		'\n' if newline else '\r' if cr else '')
