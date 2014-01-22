@@ -233,17 +233,19 @@ class VRAY_RP_render(VRayRenderPanel, bpy.types.Panel):
 			render_label= "Render Image"
 			render_icon= 'RENDER_STILL'
 
-		layout.operator('render.render', text= render_label, icon= render_icon)
-
-		split = layout.split()
-		col = split.column()
-		col.operator('vray.write_vrscene_nodes', icon='OBJECT_DATA')
-		if wide_ui:
+		if VRayExporter.auto_meshes:
+			layout.operator('render.render', text=render_label, icon=render_icon)
+		else:
+			split = layout.split()
 			col = split.column()
-		col.operator('vray.write_geometry', icon='OUTLINER_OB_MESH')
+			col.operator('render.render', text=render_label, icon=render_icon)
+			if wide_ui:
+				col = split.column()
+			col.operator('vray.write_geometry', icon='OUTLINER_OB_MESH')
 
 		if VRayExporter.animation:
 			layout.prop(VRayExporter, 'animation_type')
+			layout.prop(VRayExporter, 'check_animated')
 
 		split= layout.split()
 		col= split.column()
@@ -268,8 +270,6 @@ class VRAY_RP_render(VRayRenderPanel, bpy.types.Panel):
 			col.prop(SettingsOptions, 'gi_dontRenderImage')
 		col.prop(VRayExporter, 'use_still_motion_blur')
 		col.label(text="Options:")
-		if VRayExporter.animation:
-			col.prop(VRayExporter, 'check_animated')
 		col.prop(VRayExporter, 'draft')
 
 		layout.separator()
