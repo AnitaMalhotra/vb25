@@ -1486,12 +1486,7 @@ def write_scene(bus):
 		bus['camera']= scene.camera
 
 		# Write objects and geometry
-		_vray_for_blender.exportScene(
-			bpy.context.as_pointer(),
-			bus['files']['nodes'],
-			bus['files']['geometry'],
-			bus['files']['lights'],
-		)
+		_vray_for_blender.exportScene(bus['exporter'])
 
 		timerStart = time.clock()
 
@@ -1511,6 +1506,8 @@ def write_scene(bus):
 
 			if ob.type == 'LAMP':
 				write_lamp(bus)
+
+		# TODO: Mesh lights
 
 		# Write materials
 		bus['node']['object'] = None
@@ -1548,110 +1545,32 @@ def write_scene(bus):
 
 		debug(scene, "Writing lights, materials and settings in %.2f" % (time.clock() - timerStart))
 
-
-	def write_frame_(bus, checkAnimated='NONE'):
-		timer= time.clock()
-		scene= bus['scene']
-
-		VRayScene=       scene.vray
-
-		VRayExporter=    VRayScene.exporter
-		SettingsOptions= VRayScene.SettingsOptions
-
-		# Cache stores already exported data
-		bus['cache']= {}
-		bus['cache']['textures']=  []
-		bus['cache']['materials']= []
-		bus['cache']['displace']=  []
-		bus['cache']['proxy']=     []
-		bus['cache']['bitmap']=    []
-		bus['cache']['uvwgen']=    {}
-
-		# Fake frame for "Camera loop"
-		if VRayExporter.camera_loop:
-			for key in bus['files']:
-				if key in ('nodes','camera'):
-					# bus['files'][key].write("\n#time %.1f // %s\n" % (bus['camera_index'] + 1, bus['camera'].name))
-					pass
-		else:
-			# Camera
-			bus['camera']= scene.camera
-
-		# Visibility list for "Hide from view" and "Camera loop" features
-		bus['visibility']= get_visibility_lists(bus['camera'])
-
-		# "Hide from view" debug data
-		if VRayExporter.debug:
-			print_dict(scene, "Hide from view", bus['visibility'])
-
-		if checkAnimated == 'NONE':
-			write_settings(bus)
-
-		if VRayExporter.auto_meshes:
-			write_geometry(bus)
-
-		for ob in bus['objects']:
-			if not object_visible(bus, ob):
-				continue
-
-			# Check if smth on object is animated
-			if VRayExporter.animation:
-				if not is_animated(bus, ob):
-					continue
-
-			debug(scene, "{0}: {1:<32}".format(ob.type, color(ob.name, 'green')), VRayExporter.debug)
-
-			# Node struct
-			bus['node']= {}
-
-			# Currently processes object
-			bus['node']['object']= ob
-
-			# Object visibility
-			bus['node']['visible']= ob
-
-			# We will know if object has displace
-			# only after material export
-			bus['node']['displace']= {}
-
-			# We will know if object is mesh light
-			# only after material export
-			bus['node']['meshlight']= {}
-
-			# If object has particles or dupli
-			bus['node']['base']= ob
-			bus['node']['dupli']= {}
-			bus['node']['particle']= {}
-
-			_write_object(bus)
-
-		# TODO: Add camera animation detection
-		#
-		PLUGINS['CAMERA']['CameraPhysical'].write(bus)
-		PLUGINS['SETTINGS']['BakeView'].write(bus)
-		PLUGINS['SETTINGS']['RenderView'].write(bus)
-		PLUGINS['CAMERA']['CameraStereoscopic'].write(bus)
-
-		# SphereFade could be animated
-		# We already export SphereFade data in settings export,
-		# so skip first frame
-		if checkAnimated:
-			PLUGINS['SETTINGS']['SettingsEnvironment'].WriteSphereFade(bus)
-
-		if not checkAnimated:
-			for key in bus['files']:
-				if key in {'geometry'}:
-					continue
-				bus['files'][key].write("\n// End of static data\n")
-
-		debug(scene, "Writing frame {0}... done {1}".format(scene.frame_current, "[%.2f]"%(time.clock() - timer)))
-
 	timer= time.clock()
 
 	debug(scene, "Writing scene...")
 
+	CHECK_ANIMATED = {
+		'NONE'   : 0,
+		'SIMPLE' : 1,
+		'HASH'   : 2,
+		'BOTH'   : 3,
+	}
+
+	bus['exporter'] = _vray_for_blender.exportInit(
+		context = bpy.context.as_pointer(),
+
+		isAnimation   = VRayExporter.animation,
+		checkAnimated = CHECK_ANIMATED[VRayExporter.check_animated],
+
+		objectFile   = bus['files']['nodes'],
+		geometryFile = bus['files']['geometry'],
+		lightsFile   = bus['files']['lights'],
+	)
+
 	if bus['preview']:
 		write_frame(bus)
+		_vray_for_blender.exportExit(bus['exporter'])
+		del bus['exporter']
 		return False
 
 	if VRayExporter.animation and VRayExporter.animation_type in {'FULL', 'NOTMESHES'}:
@@ -1661,7 +1580,7 @@ def write_scene(bus):
 		# Export full first frame
 		f = scene.frame_start
 		scene.frame_set(f)
-		bus['check_animated'] = False
+		bus['check_animated'] = 'NONE'
 		write_frame(bus, checkAnimated='NONE')
 		f += scene.frame_step
 
@@ -1692,6 +1611,9 @@ def write_scene(bus):
 
 		else:
 			write_frame(bus)
+
+	_vray_for_blender.exportExit(bus['exporter'])
+	del bus['exporter']
 
 	debug(scene, "Writing scene... done {0:<64}".format("[%.2f]"%(time.clock() - timer)))
 
