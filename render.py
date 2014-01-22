@@ -1496,6 +1496,13 @@ def write_scene(bus):
 
 		# Write lights
 		for ob in bpy.context.scene.objects:
+			if ob.type not in {'LAMP'}:
+				continue
+
+			if checkAnimated not in {'NONE'}:
+				if not (ob.animation_data or ob.data.animation_data):
+					continue
+
 			bus['node'] = {
 				'object'   : ob, # Currently processes object
 				'visible'  : ob, # Object visibility
@@ -1504,14 +1511,17 @@ def write_scene(bus):
 				'particle' : {},
 			}
 
-			if ob.type == 'LAMP':
-				write_lamp(bus)
+			write_lamp(bus)
 
 		# TODO: Mesh lights
 
 		# Write materials
 		bus['node']['object'] = None
 		for ma in bpy.data.materials:
+			if checkAnimated not in {'NONE'}:
+				if not ma.animation_data:
+					continue
+
 			bus['material'] = {}
 			bus['material']['material'] = ma
 
@@ -1559,7 +1569,7 @@ def write_scene(bus):
 	bus['exporter'] = _vray_for_blender.exportInit(
 		context = bpy.context.as_pointer(),
 
-		isAnimation   = VRayExporter.animation,
+		isAnimation   = VRayExporter.animation and VRayExporter.animation_type == 'FULL',
 		checkAnimated = CHECK_ANIMATED[VRayExporter.check_animated],
 
 		objectFile   = bus['files']['nodes'],
