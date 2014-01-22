@@ -170,10 +170,10 @@ def add_properties(rna_pointer):
 	VRayExporter.check_animated = EnumProperty(
 		name  = "Check Animated",
 		items = (
-			('NONE',   "None",   "Don't check meshes for animation"),
-			('SIMPLE', "Simple", "Simple check"),
-			('HASH',   "Hash",   "Check mesh data hash"),
-			('BOTH',   "Both",   "Use both methods"),
+			('NONE',   "None",        "Don't check meshes for animation"),
+			('SIMPLE', "Data",        "Check for animation data"),
+			('HASH',   "Hash",        "Check mesh data hash"),
+			('BOTH',   "Data & Hash", "Use both methods"),
 		),
 		description = "Detect animated meshes",
 		default = 'NONE'
