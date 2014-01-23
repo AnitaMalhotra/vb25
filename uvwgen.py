@@ -77,7 +77,7 @@ def write_UVWGenProjection(bus):
 
 	uvwgen= "UVP%s" % (bus['mtex']['name'])
 
-	ob= get_orco_object(scene, bus['node']['object'], VRayTexture)
+	ob = get_orco_object(scene, VRayTexture)
 
 	ofile.write("\nUVWGenProjection %s {" % uvwgen)
 	ofile.write("\n\ttype= %d;" % TYPE[VRayTexture.mapping])

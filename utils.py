@@ -729,12 +729,12 @@ def generateDataList(namesString, dataType):
 
 
 # Get object used as ORCO projection
-def get_orco_object(scene, ob, VRayTexture):
+def get_orco_object(scene, VRayTexture):
 	if VRayTexture.object:
-		texture_object= get_data_by_name(scene, 'objects', VRayTexture.object)
+		texture_object = get_data_by_name(scene, 'objects', VRayTexture.object)
 		if texture_object:
 			return texture_object
-	return ob
+	return None
 
 
 # Naming
