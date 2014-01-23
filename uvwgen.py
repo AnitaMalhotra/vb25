@@ -43,7 +43,7 @@ def write_UVWGenPlanarWorld(bus):
 
 	uvwgen = "UWVGPW%s" % bus['mtex']['name']
 
-	ob = get_orco_object(scene, bus['node']['object'], VRayTexture)
+	ob = get_orco_object(scene, VRayTexture)
 
 	ofile.write("\nUVWGenPlanarWorld %s {" % uvwgen)
 	if ob:

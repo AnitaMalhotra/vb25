@@ -589,8 +589,7 @@ def write_material_textures(bus):
 					bus['mtex']['name']= clean_string("MA%sMT%.2iTE%s" % (ma.name, i, slot.texture.name))
 
 					if VRayTexture.texture_coords == 'ORCO':
-						bus['material']['orco_suffix']= get_name(get_orco_object(scene, bus['node']['object'], VRayTexture),
-																 prefix='ORCO')
+						bus['material']['orco_suffix']= get_name(get_orco_object(scene, VRayTexture), prefix='ORCO')
 						if bus['material']['orco_suffix']:
 							bus['mtex']['name']+= bus['material']['orco_suffix']
 
