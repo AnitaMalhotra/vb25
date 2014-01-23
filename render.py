@@ -1459,7 +1459,7 @@ def write_scene(bus):
 							exclude_list.append(ob)
 
 	for ob in scene.objects:
-		if ob.type in ('CAMERA','ARMATURE','LATTICE'):
+		if ob.type in {'CAMERA','ARMATURE','LATTICE'}:
 			continue
 
 		if ob not in exclude_list:
