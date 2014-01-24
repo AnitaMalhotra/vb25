@@ -160,9 +160,10 @@ def add_properties(rna_pointer):
 		name= "Animation Mode",
 		description= "Animation Type",
 		items= (
-			('FRAMEBYFRAME', "Frame-By-Frame", "Export and render frame by frame"),
-			('FULL',         "Full Range",     "Export full animation range then render"),
-			('NOTMESHES',    "All But Meshes", "Export full animation range then render (meshes are not animated)")
+			('FRAMEBYFRAME', "Frame-By-Frame",    "Export and render frame by frame"),
+			('FULL',         "Full Range",        "Export full animation range then render"),
+			('NOTMESHES',    "Full Range Except Meshes", "Export full animation range then render (meshes are not animated)"),
+			('CAMERA',       "Camera Only",       "Export full animation of camera motion"),
 		),
 		default= 'FRAMEBYFRAME'
 	)
