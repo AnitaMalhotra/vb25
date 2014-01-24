@@ -1444,6 +1444,8 @@ def write_scene(bus):
 	bus['effects']['toon']['objects']= []
 
 	# Prepare exclude for effects
+	# TODO: Pass this list to C++ expoter
+	#
 	exclude_list= []
 	VRayEffects=  VRayScene.VRayEffects
 	if VRayEffects.use:
@@ -1457,15 +1459,6 @@ def write_scene(bus):
 							continue
 						if ob not in exclude_list:
 							exclude_list.append(ob)
-
-	for ob in scene.objects:
-		if ob.type in {'CAMERA','ARMATURE','LATTICE'}:
-			continue
-
-		if ob not in exclude_list:
-			bus['objects'].append(ob)
-
-	del exclude_list
 
 	def write_frame(bus, checkAnimated='NONE'):
 		scene = bus['scene']
@@ -1485,6 +1478,9 @@ def write_scene(bus):
 		# Camera
 		bus['camera']= scene.camera
 
+		# Fake node; get rid of this...
+		bus['node'] = {}
+
 		# Write objects and geometry
 		_vray_for_blender.exportScene(bus['exporter'])
 
@@ -1496,6 +1492,9 @@ def write_scene(bus):
 
 		# Write lights
 		for ob in bpy.context.scene.objects:
+			if bus['engine'].test_break():
+				break
+
 			if ob.type not in {'LAMP'}:
 				continue
 
@@ -1503,13 +1502,13 @@ def write_scene(bus):
 				if not (ob.animation_data or ob.data.animation_data):
 					continue
 
-			bus['node'] = {
+			bus['node'].update({
 				'object'   : ob, # Currently processes object
 				'visible'  : ob, # Object visibility
 				'base'     : ob, # Attributes for particle / dupli export
 				'dupli'    : {},
 				'particle' : {},
-			}
+			})
 
 			write_lamp(bus)
 
@@ -1518,6 +1517,9 @@ def write_scene(bus):
 		# Write materials
 		bus['node']['object'] = None
 		for ma in bpy.data.materials:
+			if bus['engine'].test_break():
+				break
+
 			if checkAnimated not in {'NONE'}:
 				if not ma.animation_data:
 					continue
@@ -1627,6 +1629,9 @@ def write_scene(bus):
 	del bus['exporter']
 
 	debug(scene, "Writing scene... done {0:<64}".format("[%.2f]"%(time.clock() - timer)))
+
+	if bus['engine'].test_break():
+		return True
 
 	return False # No errors
 
