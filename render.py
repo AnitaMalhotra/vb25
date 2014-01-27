@@ -1572,6 +1572,9 @@ def write_scene(bus):
 		context = bpy.context.as_pointer(),
 		engine  = bus['engine'].as_pointer(),
 
+		exportNodes    = True,
+		exportGeometry = True,
+
 		isAnimation   = VRayExporter.animation and VRayExporter.animation_type == 'FULL',
 		checkAnimated = CHECK_ANIMATED[VRayExporter.check_animated],
 

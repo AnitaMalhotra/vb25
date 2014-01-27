@@ -84,7 +84,7 @@ def write_UVWGenProjection(bus):
 	if ob:
 		uvw_transform= mathutils.Matrix.Rotation(math.radians(90.0), 4, 'X') # To match Blender mapping
 		uvw_transform*= ob.matrix_world.copy().inverted()                    # To remove object transfrom
-		ofile.write("\n\tuvw_transform= %s; // Object: %s" % (a(scene, transform(uvw_transform)), ob.name))
+		ofile.write("\n\tuvw_transform= %s; // Object: %s" % (a(scene, transform(uvw_transform), ob.name)))
 	# Add:
 	#  - camera_settings
 	#  - camera_view
