@@ -1515,8 +1515,18 @@ def write_scene(bus):
 		# TODO: Mesh lights
 
 		# Write materials
+		materials = bpy.data.materials
+		if bus['preview']:
+			def previewMaterials():
+				for ob in scene.objects:
+					if len(ob.material_slots):
+						for ms in ob.material_slots:
+							if ms.material:
+								yield ms.material
+			materials = previewMaterials()
+
 		bus['node']['object'] = None
-		for ma in bpy.data.materials:
+		for ma in materials:
 			if bus['engine'].test_break():
 				break
 
@@ -1568,6 +1578,31 @@ def write_scene(bus):
 		'BOTH'   : 3,
 	}
 
+	if bus['preview']:
+		bus['exporter'] = _vray_for_blender.exportInit(
+			context = bpy.context.as_pointer(),
+			engine  = bus['engine'].as_pointer(),
+			scene   = scene.as_pointer(),
+
+			exportNodes    = True,
+			exportGeometry = False,
+
+			isAnimation   = False,
+			checkAnimated = 0,
+
+			objectFile   = bus['files']['nodes'],
+			geometryFile = bus['files']['geometry'],
+			lightsFile   = bus['files']['lights'],
+		)
+
+		write_frame(bus)
+
+		_vray_for_blender.exportExit(bus['exporter'])
+
+		del bus['exporter']
+
+		return False
+
 	bus['exporter'] = _vray_for_blender.exportInit(
 		context = bpy.context.as_pointer(),
 		engine  = bus['engine'].as_pointer(),
@@ -1582,12 +1617,6 @@ def write_scene(bus):
 		geometryFile = bus['files']['geometry'],
 		lightsFile   = bus['files']['lights'],
 	)
-
-	if bus['preview']:
-		write_frame(bus)
-		_vray_for_blender.exportExit(bus['exporter'])
-		del bus['exporter']
-		return False
 
 	if VRayExporter.animation and VRayExporter.animation_type in {'FULL', 'NOTMESHES'}:
 		# Store current frame
