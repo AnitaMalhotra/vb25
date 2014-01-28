@@ -26,6 +26,7 @@
 
 
 ''' Python modules  '''
+import datetime
 import math
 import os
 import string
@@ -1321,7 +1322,9 @@ def write_scene(bus):
 	bus['defaults']['blend']=    "TEDefaultBlend"
 
 	for key in bus['files']:
-		bus['files'][key].write("// V-Ray/Blender")
+		bus['files'][key].write("// V-Ray For Blender")
+		bus['files'][key].write("\n// %s" % datetime.datetime.now().strftime("%A, %d %B %Y %H:%M"))
+		bus['files'][key].write("\n// Filename: %s\n" % os.path.basename(bpy.data.filepath))
 
 	bus['files']['scene'].write("\n// Settings\n")
 	bus['files']['nodes'].write("\n// Nodes\n")
