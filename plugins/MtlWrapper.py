@@ -51,12 +51,8 @@ PARAMS= (
 	'matte_for_secondary_rays',
 	'gi_surface_id',
 	'gi_quality_multiplier',
-	#'alpha_contribution_tex',
-	#'shadow_brightness_tex',
-	#'reflection_filter_tex',
 	'generate_render_elements',
 	'trace_depth',
-	#'channels'
 )
 
 
@@ -245,17 +241,6 @@ def add_properties(rna_pointer):
 		soft_max= 1.0,
 		precision= 3,
 		default= 1
-	)
-
-	MtlWrapper.reflection_filter_tex= FloatVectorProperty(
-		name= "Reflection filter",
-		description= 'Reflection filter',
-		subtype= 'COLOR',
-		min= 0.0,
-		max= 1.0,
-		soft_min= 0.0,
-		soft_max= 1.0,
-		default= (1.0,1.0,1.0)
 	)
 
 	MtlWrapper.trace_depth= IntProperty(
