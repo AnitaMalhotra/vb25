@@ -218,10 +218,12 @@ def add_properties(rna_pointer):
 		default= True
 	)
 
-	MtlWrapper.matte_for_secondary_rays= BoolProperty(
+	MtlWrapper.matte_for_secondary_rays= IntProperty(
 		name= "Matte for secondary rays",
-		description= "Turn this on to make the material act as matte for all secondary rays (reflections, refractions, etc)",
-		default= False
+		description= "Set this to 1 to make the material act as matte for all secondary rays (reflections and refractions); if set to 2, the material will perform automatic projection mapping of theenvironment map on the matte geometry",
+		min= 0,
+		max= 2,
+		default= 0
 	)
 
 	MtlWrapper.gi_surface_id= IntProperty(
