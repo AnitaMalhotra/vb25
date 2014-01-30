@@ -57,6 +57,9 @@ else:
 
 
 def register():
+	import _vray_for_blender
+	_vray_for_blender.start("/home/bdancer/devel/vray/vray_json")
+
 	ui.register()
 	events.register()
 	plugins.add_properties()
@@ -64,6 +67,9 @@ def register():
 
 
 def unregister():
+	import _vray_for_blender
+	_vray_for_blender.free()
+
 	render_ops.unregister()
 	plugins.remove_properties()
 	events.unregister()
