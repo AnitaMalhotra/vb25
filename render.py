@@ -1582,7 +1582,7 @@ def write_scene(bus):
 	}
 
 	if bus['preview']:
-		bus['exporter'] = _vray_for_blender.exportInit(
+		bus['exporter'] = _vray_for_blender.init(
 			context = bpy.context.as_pointer(),
 			engine  = bus['engine'].as_pointer(),
 			scene   = scene.as_pointer(),
@@ -1600,13 +1600,13 @@ def write_scene(bus):
 
 		write_frame(bus)
 
-		_vray_for_blender.exportExit(bus['exporter'])
+		_vray_for_blender.exit(bus['exporter'])
 
 		del bus['exporter']
 
 		return False
 
-	bus['exporter'] = _vray_for_blender.exportInit(
+	bus['exporter'] = _vray_for_blender.init(
 		context = bpy.context.as_pointer(),
 		engine  = bus['engine'].as_pointer(),
 
@@ -1660,7 +1660,7 @@ def write_scene(bus):
 		else:
 			write_frame(bus)
 
-	_vray_for_blender.exportExit(bus['exporter'])
+	_vray_for_blender.exit(bus['exporter'])
 	del bus['exporter']
 
 	debug(scene, "Writing scene... done {0:<64}".format("[%.2f]"%(time.clock() - timer)))
