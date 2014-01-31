@@ -497,12 +497,12 @@ def	write_material(bus):
 	
 
 	ob=    bus['node']['object']
-	base=  bus['node']['base']
+	base=  bus['node'].get('base')
 
 	ma=    bus['material']['material']
 
 	# Linked groups material override feature
-	if base.dupli_type == 'GROUP':
+	if base and base.dupli_type == 'GROUP':
 		base_material_names= []
 		for slot in base.material_slots:
 			if slot and slot.material:
@@ -1486,6 +1486,7 @@ def write_scene(bus):
 
 		# Write objects and geometry
 		_vray_for_blender.exportScene(bus['exporter'])
+		_vray_for_blender.clearCache()
 
 		timerStart = time.clock()
 
@@ -1518,6 +1519,7 @@ def write_scene(bus):
 		# TODO: Mesh lights
 
 		# Write materials
+		#
 		materials = bpy.data.materials
 		if bus['preview']:
 			def previewMaterials():
@@ -1621,20 +1623,13 @@ def write_scene(bus):
 		lightsFile   = bus['files']['lights'],
 	)
 
+	_vray_for_blender.initCache(VRayExporter.animation, CHECK_ANIMATED[VRayExporter.check_animated])
+
 	if VRayExporter.animation and VRayExporter.animation_type in {'FULL', 'NOTMESHES'}:
 		# Store current frame
 		selected_frame = scene.frame_current
 
-		# Export full first frame
 		f = scene.frame_start
-		scene.frame_set(f)
-		bus['check_animated'] = 'NONE'
-		write_frame(bus, checkAnimated='NONE')
-		f += scene.frame_step
-
-		# Export the rest of frames checking
-		# if stuff is animated
-		#
 		while(f <= scene.frame_end):
 			if bus['engine'] and bus['engine'].test_break():
 				return
@@ -1645,6 +1640,8 @@ def write_scene(bus):
 
 		# Restore selected frame
 		scene.frame_set(selected_frame)
+
+		_vray_for_blender.clearFrames()
 	else:
 		if VRayExporter.camera_loop:
 			if bus['cameras']:
