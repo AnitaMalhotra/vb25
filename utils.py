@@ -517,7 +517,7 @@ def debug(scene, message, newline= True, cr= True, error= False):
 	# 	'\n' if newline else '\r' if cr else '')
 	# )
 	sys.stdout.write("%s: %s%s%s" % (
-		color("V-Ray For Blender", 'green'),
+		color("V-Ray/Blender", 'green'),
 		color("Error! ", 'red') if error else '',
 		message,
 		'\n' if newline else '\r' if cr else '')
@@ -588,13 +588,50 @@ def a(scene, t):
 
 # Checks if object is animated
 #
-def is_animated(bus, data):
-	if bus['check_animated'] not in {'NONE'}:
+# TODO: cache results
+#
+def is_animated(ob):
+	print("ob.name", ob.name)
+	print("ob.animation_data",ob.animation_data)
+
+	if ob.animation_data:
 		return True
-	if data in bus['anim']:
+
+	if ob.type in GEOM_TYPES:
+		# Check if material is animated
+		if len(ob.material_slots):
+			for slot in ob.material_slots:
+				ma = slot.material
+				if not ma:
+					continue
+				if ma.animation_data:
+					return True
+				# Check if texture is animated
+				if len(ma.texture_slots):
+					for tSlot in ma.texture_slots:
+						if not tSlot:
+							continue
+						if not tSlot.texture:
+							continue
+						if tSlot.texture.animation_data:
+							return True
+	elif ob.type in {'LAMP'}:
+		pass
+
+	return False
+
+
+# Checks if objects mesh is animated
+def is_data_animated(ob):
+	if not ob.data:
+		return False
+
+	print("ob.data.name", ob.name)
+	print("ob.data.animation_data", ob.data.animation_data)
+
+	if ob.data.animation_data:
 		return True
-	if data.animation_data:
-		bus['anim'].add(data)
+	if ob.active_shape_key:
 		return True
 	return False
 
@@ -729,12 +766,12 @@ def generateDataList(namesString, dataType):
 
 
 # Get object used as ORCO projection
-def get_orco_object(scene, VRayTexture):
+def get_orco_object(scene, ob, VRayTexture):
 	if VRayTexture.object:
-		texture_object = get_data_by_name(scene, 'objects', VRayTexture.object)
+		texture_object= get_data_by_name(scene, 'objects', VRayTexture.object)
 		if texture_object:
 			return texture_object
-	return None
+	return ob
 
 
 # Naming
