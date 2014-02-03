@@ -57,7 +57,7 @@ def caller_name(skip=2):
     return ".".join(name)
 
 
-def msg(msg=""):
+def msg(msg="", skip=2):
     if bpy.app.debug:
-        print("...", caller_name())
+        print("...", caller_name(skip))
         print("......", msg)
