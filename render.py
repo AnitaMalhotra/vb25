@@ -1322,6 +1322,8 @@ def write_scene(bus):
 	bus['defaults']['blend']=    "TEDefaultBlend"
 
 	for key in bus['files']:
+		if bus['files'][key] is None:
+			continue
 		bus['files'][key].write("// V-Ray For Blender")
 		bus['files'][key].write("\n// %s" % datetime.datetime.now().strftime("%A, %d %B %Y %H:%M"))
 		bus['files'][key].write("\n// Filename: %s\n" % os.path.basename(bpy.data.filepath))
@@ -1625,7 +1627,7 @@ def write_scene(bus):
 		engine  = bus['engine'].as_pointer(),
 
 		exportNodes    = True,
-		exportGeometry = True,
+		exportGeometry = VRayExporter.auto_meshes,
 
 		isAnimation   = VRayExporter.animation and VRayExporter.animation_type == 'FULL',
 		checkAnimated = CHECK_ANIMATED[VRayExporter.check_animated],
@@ -1963,8 +1965,9 @@ def run(bus):
 
 def close_files(bus):
 	for key in bus['files']:
+		if bus['files'][key] is None:
+			continue
 		bus['files'][key].write("\n")
-		bus['files'][key].flush()
 		bus['files'][key].close()
 
 

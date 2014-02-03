@@ -233,15 +233,8 @@ class VRAY_RP_render(VRayRenderPanel, bpy.types.Panel):
 			render_label= "Render Image"
 			render_icon= 'RENDER_STILL'
 
-		if VRayExporter.auto_meshes:
-			layout.operator('render.render', text=render_label, icon=render_icon)
-		else:
-			split = layout.split()
-			col = split.column()
-			col.operator('render.render', text=render_label, icon=render_icon)
-			if wide_ui:
-				col = split.column()
-			col.operator('vray.write_geometry', icon='OUTLINER_OB_MESH')
+		layout.operator('render.render', text=render_label, icon=render_icon)
+		layout.prop(VRayExporter, 'auto_meshes', text="Re-Export Meshes")
 
 		if VRayExporter.animation:
 			layout.prop(VRayExporter, 'animation_type')
