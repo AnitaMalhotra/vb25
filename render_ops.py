@@ -926,81 +926,6 @@ def init(context):
 
 	return bus
 
-class VRAY_OT_write_scene(bpy.types.Operator):
-	bl_idname      = "vray.write_scene"
-	bl_label       = "Export scene"
-	bl_description = "Export scene to \"vrscene\" file"
-
-	def execute(self, context):
-
-		vb25.render.write_scene(init(context))
-
-		return {'FINISHED'}
-
-
-
-class VRAY_OT_write_geometry(bpy.types.Operator):
-	bl_idname      = "vray.write_geometry"
-	bl_label       = "Export meshes"
-	bl_description = "Export meshes into vrscene file"
-
-	dialog_width = 180
-
-	def draw(self, context):
-		layout = self.layout
-		split = layout.split()
-		col = split.column()
-		col.label(text = "Animation mode is active!")
-		col.label(text = "Are you sure to export meshes?")
-
-	def invoke(self, context, event):
-		wm    = context.window_manager
-		scene = context.scene
-
-		VRayScene    = scene.vray
-		VRayExporter = VRayScene.exporter
-
-		if not bpy.app.background:
-			if VRayExporter.animation and VRayExporter.animation_type == 'FULL':
-				return wm.invoke_props_dialog(self, self.dialog_width)
-
-		return self.execute(context)
-
-	def execute(self, context):
-
-		vb25.render.write_geometry(init(context))
-
-		return {'FINISHED'}
-
-
-class VRAY_OT_render(bpy.types.Operator):
-	bl_idname      = "vray.render"
-	bl_label       = "V-Ray Renderer"
-	bl_description = "Render operator"
-
-	def execute(self, context):
-		scene = context.scene
-
-		VRayScene    = scene.vray
-		VRayExporter = VRayScene.exporter
-
-		vb25.render.render(None, scene)
-
-		return {'FINISHED'}
-
-
-
-class VRAY_OT_run(bpy.types.Operator):
-	bl_idname      = "vray.run"
-	bl_label       = "Run V-Ray"
-	bl_description = "Run V-Ray renderer"
-
-	def execute(self, context):
-
-		vb25.render.run(None, context.scene)
-
-		return {'FINISHED'}
-
 
 
 class VRAY_OT_terminate(bpy.types.Operator):
@@ -1329,10 +1254,6 @@ def GetRegClasses():
 		VRAY_OT_flip_resolution,
 		VRAY_OT_proxy_load_preview,
 		VRAY_OT_create_proxy,
-		VRAY_OT_write_scene,
-		VRAY_OT_write_geometry,
-		VRAY_OT_render,
-		VRAY_OT_run,
 		VRAY_OT_terminate,
 		VRAY_OT_set_kelvin_color,
 		VRAY_OT_add_sky,
