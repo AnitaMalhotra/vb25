@@ -465,12 +465,10 @@ def write_lamp_textures(bus):
 					bus['mtex']['slot']=    slot
 					bus['mtex']['texture']= slot.texture
 					bus['mtex']['factor']=  factor
-					bus['mtex']['name']=    clean_string("LT%.2iSL%sTE%s" % (i,
-																			 slot.name,
-																			 slot.texture.name))
+					bus['mtex']['name'] = clean_string(get_name(slot.texture, prefix='TE'))
 
 					# Write texture
-					if write_texture(bus):
+					if bus['mtex']['name'] in bus['cache']['textures']:
 						bus['lamp_textures'][key].append( [stack_write_texture(bus),
 														   slot.use_stencil,
 														   VRaySlot.blend_mode] )
