@@ -336,7 +336,7 @@ def write_settings(bus):
 	PLUGINS['CAMERA']['SettingsMotionBlur'].write(bus)
 
 	for key in PLUGINS['SETTINGS']:
-		if key in ('BakeView', 'RenderView'):
+		if key in {'BakeView', 'RenderView'}:
 			# Skip some plugins
 			continue
 
@@ -1490,10 +1490,6 @@ def write_scene(bus):
 
 		timerStart = time.clock()
 
-		# Write settings
-		if checkAnimated == 'NONE':
-			write_settings(bus)
-
 		# Write lights
 		for ob in bpy.context.scene.objects:
 			if bus['engine'].test_break():
@@ -1517,6 +1513,18 @@ def write_scene(bus):
 			write_lamp(bus)
 
 		# TODO: Mesh lights
+
+		# Write textures
+		for tex in bpy.data.textures:
+			if bus['engine'].test_break():
+				break
+
+			bus['mtex'] = {
+				'name'    : clean_string(get_name(tex, prefix='TE')),
+				'texture' : tex,
+			}
+
+			write_texture(bus)
 
 		# Write materials
 		#
@@ -1557,6 +1565,10 @@ def write_scene(bus):
 
 			write_material(bus)
 
+		# Write settings
+		if checkAnimated == 'NONE':
+			write_settings(bus)
+
 		# TODO: Add camera animation detection
 		#
 		PLUGINS['CAMERA']['CameraPhysical'].write(bus)
@@ -1567,7 +1579,7 @@ def write_scene(bus):
 		# SphereFade could be animated
 		# We already export SphereFade data in settings export,
 		# so skip first frame
-		if checkAnimated:
+		if checkAnimated not in {'NONE'}:
 			PLUGINS['SETTINGS']['SettingsEnvironment'].WriteSphereFade(bus)
 
 		debug(scene, "Writing lights, materials and settings in %.2f" % (time.clock() - timerStart))

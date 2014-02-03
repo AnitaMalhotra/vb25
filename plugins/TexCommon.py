@@ -436,13 +436,12 @@ def write(bus):
 	ofile= bus['files']['textures']
 	scene= bus['scene']
 
-	slot=    bus['mtex']['slot']
 	texture= bus['mtex']['texture']
 
 	VRayTexture= texture.vray
 	VRaySlot=    texture.vray_slot
 
-	if VRayTexture.type not in ('TexFalloff'):
+	if VRayTexture.type not in {'TexFalloff'}:
 		ofile.write("\n\tplacement_type= %i;" % PLACEMENT_TYPE[VRayTexture.placement_type])
 		ofile.write("\n\ttile_u= %d;\n\ttile_v= %d;" % TILE[VRayTexture.tile])
 		ofile.write("\n\tu= %s;" % a(scene, VRayTexture.u))
@@ -522,21 +521,17 @@ class VRAY_TP_Mapping(ui.VRayTexturePanel, bpy.types.Panel):
 		TexPlugin= getattr(VRayTexture, VRayTexture.type) if tex.type == 'VRAY' else None
 
 		if issubclass(type(idblock), bpy.types.Material):
-			if wide_ui:
-				layout.prop(VRayTexture, 'texture_coords', expand=True)
-			else:
-				layout.prop(VRayTexture, 'texture_coords')
+			layout.prop(VRayTexture, 'texture_coords', expand=wide_ui)
 
 			if VRayTexture.texture_coords == 'UV':
-				if slot:
-					split= layout.split(percentage=0.3)
-					split.label(text="Layer:")
-					if ob and ob.type == 'MESH':
-						split.prop_search(slot,    'uv_layer',
-										  ob.data, 'uv_textures',
-										  text="")
-					else:
-						split.prop(slot, 'uv_layer', text="")
+				split= layout.split(percentage=0.3)
+				split.label(text="Layer:")
+				if ob and ob.type == 'MESH':
+					split.prop_search(VRaySlot,    'uv_layer',
+									  ob.data, 'uv_textures',
+									  text="")
+				else:
+					split.prop(VRaySlot, 'uv_layer', text="")
 			elif VRayTexture.texture_coords == 'ORCO':
 				split= layout.split(percentage=0.3)
 				split.label(text="Projection:")
@@ -547,24 +542,23 @@ class VRAY_TP_Mapping(ui.VRayTexturePanel, bpy.types.Panel):
 								  sce,         'objects',
 								  text="")
 
-			if slot:
-				split= layout.split()
-				col= split.column()
-				col.label(text="Offset:")
-				if wide_ui:
-					sub= col.row()
-				else:
-					sub= col.column()
-				sub.prop(slot, 'offset', text="")
+			split= layout.split()
+			col= split.column()
+			col.label(text="Offset:")
+			if wide_ui:
+				sub= col.row()
+			else:
+				sub= col.column()
+			sub.prop(VRaySlot, 'offset', text="")
 
-				split= layout.split()
-				col= split.column()
-				col.label(text="Scale:")
-				if wide_ui:
-					sub= col.row()
-				else:
-					sub= col.column()
-				sub.prop(slot, 'scale', text="")
+			split= layout.split()
+			col= split.column()
+			col.label(text="Scale:")
+			if wide_ui:
+				sub= col.row()
+			else:
+				sub= col.column()
+			sub.prop(VRaySlot, 'scale', text="")
 
 			layout.separator()
 

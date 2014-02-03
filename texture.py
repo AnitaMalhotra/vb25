@@ -118,9 +118,6 @@ def write_texture(bus):
 				bus['material']['normal_uvwgen'] = bus['cache']['uvwgen'].get(bus['mtex']['name'], bus['defaults']['uvwgen'])
 		return bus['mtex']['name']
 
-	if texture.use_nodes:
-		return write_node_texture(bus)
-
 	if texture.type == 'IMAGE':
 		return PLUGINS['TEXTURE']['TexBitmap'].write(bus)
 
@@ -583,21 +580,13 @@ def write_material_textures(bus):
 					bus['mtex']['texture'] = slot.texture
 					bus['mtex']['mapto']   = mapto
 					bus['mtex']['factor']  = factor
-
-					# Check if we could improve this
-					# Better handling of texture blending
-					bus['mtex']['name']= clean_string("MA%sMT%.2iTE%s" % (ma.name, i, slot.texture.name))
-
-					if VRayTexture.texture_coords == 'ORCO':
-						bus['material']['orco_suffix']= get_name(get_orco_object(scene, VRayTexture), prefix='ORCO')
-						if bus['material']['orco_suffix']:
-							bus['mtex']['name']+= bus['material']['orco_suffix']
+					bus['mtex']['name'] = clean_string(get_name(slot.texture, prefix='TE'))
 
 					if VRayExporter.debug:
 						print_dict(scene, "bus['mtex']", bus['mtex'])
 
-					# Write texture
-					if write_texture(bus):
+					# Write blending stuff
+					if bus['mtex']['name'] in bus['cache']['textures']:
 						# Append texture to stack and write texture with factor
 						bus['textures'][mapto].append( [stack_write_texture(bus),
 														slot.use_stencil,

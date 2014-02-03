@@ -216,7 +216,6 @@ def write(bus):
 	ofile= bus['files']['textures']
 	scene= bus['scene']
 
-	slot=     bus['mtex']['slot']
 	texture=  bus['mtex']['texture']
 	tex_name= bus['mtex']['name']
 

@@ -958,6 +958,21 @@ def add_properties():
 	bpy.utils.register_class(VRayLightSlot)
 
 	class VRaySlot(bpy.types.PropertyGroup):
+		uv_layer = StringProperty(
+			name        = "UV Map",
+			description = "UV map to use",
+			default     = ""
+		)
+
+		offset = FloatVectorProperty(
+			subtype = 'TRANSLATION',
+		)
+
+		scale = FloatVectorProperty(
+			subtype = 'TRANSLATION',
+			default = (1.0,1.0,1.0),
+		)
+
 		# Move to Slot plugin
 		uvwgen= StringProperty(
 			name= "UVW Generator",
@@ -985,7 +1000,7 @@ def add_properties():
 				('DESATUREATE', "Desaturate", ""),
 				('ILLUMINATE',  "Illuminate", ""),
 			),
-			default= 'OVER'
+			default= 'NONE'
 		)
 
 		texture_rot= FloatProperty(

@@ -84,7 +84,7 @@ def write_UVWGenProjection(bus):
 	if ob:
 		uvw_transform= mathutils.Matrix.Rotation(math.radians(90.0), 4, 'X') # To match Blender mapping
 		uvw_transform*= ob.matrix_world.copy().inverted()                    # To remove object transfrom
-		ofile.write("\n\tuvw_transform= %s; // Object: %s" % (a(scene, transform(uvw_transform), ob.name)))
+		ofile.write("\n\tuvw_transform= %s; // Object: %s" % (a(scene, transform(uvw_transform)), ob.name))
 	# Add:
 	#  - camera_settings
 	#  - camera_view
@@ -98,7 +98,6 @@ def write_UVWGenChannel(bus):
 	sce   = bus['scene']
 
 	texture = bus['mtex']['texture']
-	slot    = bus['mtex'].get('slot')
 
 	uvw_name = "UVC%s" % (bus['mtex']['name'])
 
@@ -114,20 +113,14 @@ def write_UVWGenChannel(bus):
 		uvwgen = write_UVWGenPlanarWorld(bus)
 
 	ofile.write("\nUVWGenMayaPlace2dTexture %s {" % uvw_name)
-	if slot:
-		if bus['preview']:
-			ofile.write('\n\tuvw_channel=0;')
-		else:
-			if hasattr(slot, 'uv_layer') and slot.uv_layer:
-				ofile.write('\n\tuv_set_name="%s";' % slot.uv_layer)
-			else:
-				ofile.write('\n\tuv_set_name="UVMap";')
-			ofile.write("\n\ttranslate_frame_u=%.3f;" % slot.offset[0])
-			ofile.write("\n\ttranslate_frame_v=%.3f;" % slot.offset[1])
-			# ofile.write("\n\tcoverage_u=%.3f;" % slot.scale[0])
-			# ofile.write("\n\tcoverage_v=%.3f;" % slot.scale[1])
-	else:
+	if bus['preview']:
 		ofile.write('\n\tuvw_channel=0;')
+	else:
+		ofile.write('\n\tuv_set_name="%s";' % (VRaySlot.uv_layer if VRaySlot.uv_layer else "UVMap"))
+		ofile.write("\n\ttranslate_frame_u=%.3f;" % VRaySlot.offset[0])
+		ofile.write("\n\ttranslate_frame_v=%.3f;" % VRaySlot.offset[1])
+		# ofile.write("\n\tcoverage_u=%.3f;" % VRaySlot.scale[0])
+		# ofile.write("\n\tcoverage_v=%.3f;" % VRaySlot.scale[1])
 	ofile.write("\n\tmirror_u=%d;" % VRayTexture.mirror_u)
 	ofile.write("\n\tmirror_v=%d;" % VRayTexture.mirror_v)
 	ofile.write("\n\trepeat_u=%.3f;" % VRayTexture.tile_u)
@@ -155,7 +148,6 @@ def write_UVWGenEnvironment(bus):
 	scene= bus['scene']
 	ofile= bus['files']['textures']
 
-	slot=     bus['mtex']['slot']
 	texture=  bus['mtex']['texture']
 	tex_name= bus['mtex']['name']
 
@@ -170,7 +162,7 @@ def write_UVWGenEnvironment(bus):
 
 	ofile.write("\nUVWGenEnvironment %s {" % uvw_name)
 	ofile.write("\n\tmapping_type= \"%s\";" % MAPPING_TYPE[VRayTexture.environment_mapping])
-	if VRayTexture.environment_mapping not in ('SCREEN'):
+	if VRayTexture.environment_mapping not in {'SCREEN'}:
 		ofile.write("\n\tuvw_matrix= %s;" % transform(uvw_matrix))
 	else:
 		ofile.write("\n\tuvw_transform= %s;" % transform(uvw_matrix))
@@ -184,10 +176,9 @@ def write_UVWGenEnvironment(bus):
 
 
 def write_uvwgen(bus):
-	slot=    bus['mtex']['slot']
 	texture= bus['mtex']['texture']
 
-	if type(slot) is bpy.types.WorldTextureSlot or ('dome' in bus['mtex'] and bus['mtex']['dome']):
+	if 'dome' in bus['mtex'] and bus['mtex']['dome']:
 		return write_UVWGenEnvironment(bus)
 
 	else:
