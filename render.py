@@ -486,13 +486,7 @@ def write_lamp_textures(bus):
 
 def	write_material(bus):
 	scene= bus['scene']
-#	Includer = scene.vray.Includer
-#	if Includer.materials:
-#		return
-
-
 	ofile= bus['files']['materials']
-	
 
 	ob=    bus['node']['object']
 	base=  bus['node'].get('base')
@@ -1275,18 +1269,13 @@ def writeSceneInclude(bus):
 
 def _write_object(bus):
 	ob = bus['node']['object']
-#	VRayScene = bus['scene'].vray
-#	Includer = VRayScene.Includer
 
 	if ob.type in {'CAMERA','ARMATURE','LATTICE','SPEAKER'}:
 		return
 
 	# Export LAMP
 	if ob.type == 'LAMP':
-#		if Includer.lights:
 		write_lamp(bus)
-#		else:
-#			return
 
 	elif ob.type == 'EMPTY':
 		writeSceneInclude(bus)
@@ -1309,7 +1298,6 @@ def write_scene(bus):
 
 	VRayExporter=    VRayScene.exporter
 	SettingsOptions= VRayScene.SettingsOptions
-#	Includer = VRayScene.Includer
 
 	# Some failsafe defaults
 	bus['defaults']= {}
@@ -1328,7 +1316,6 @@ def write_scene(bus):
 
 	bus['files']['scene'].write("\n// Settings\n")
 	bus['files']['nodes'].write("\n// Nodes\n")
-#	if Includer.lights:
 	bus['files']['lights'].write("\n// Lights\n")
 	bus['files']['camera'].write("\n// Camera\n")
 	bus['files']['environment'].write("\n// Environment\n")
