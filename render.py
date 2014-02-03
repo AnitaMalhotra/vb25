@@ -53,6 +53,7 @@ from vb25.utils   import *
 from vb25.plugins import *
 from vb25.texture import *
 from vb25.nodes   import *
+from vb25 import dbg
 
 
 VERSION = '2.5'
@@ -894,6 +895,17 @@ def write_lamp(bus):
 		ofile.write("\n\t%s=List(%s);" % (key, ",".join(renderChannelArray)))
 
 	ofile.write("\n}\n")
+
+	# Data for SettingsLightLinker
+	#
+	if VRayLamp.use_include_exclude:
+		bus['lightlinker'][lamp_name] = {}
+
+		if VRayLamp.use_include:
+			bus['lightlinker'][lamp_name]['include'] = generate_object_list(VRayLamp.include_objects, VRayLamp.include_groups)
+
+		if VRayLamp.use_exclude:
+			bus['lightlinker'][lamp_name]['exclude'] = generate_object_list(VRayLamp.exclude_objects, VRayLamp.exclude_groups)
 
 
 def write_node(bus):
@@ -1988,6 +2000,8 @@ def init_bus(engine, scene, preview = False):
 	# Output files
 	bus['files']=     {}
 	bus['filenames']= {}
+
+	bus['lightlinker'] = {}
 
 	bus['check_animated'] = 'NONE'
 	bus['anim'] = set()

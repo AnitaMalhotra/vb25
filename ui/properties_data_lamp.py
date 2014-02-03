@@ -359,11 +359,19 @@ class VRAY_DP_include_exclude(VRayLampPanel, bpy.types.Panel):
 
 		layout.active= VRayLamp.use_include_exclude
 
+		layout.prop(VRayLamp, 'use_include')
 		split= layout.split()
+		split.active = VRayLamp.use_include
 		col= split.column()
-		col.prop(VRayLamp, 'include_exclude', text="")
 		col.prop_search(VRayLamp, 'include_objects',  context.scene, 'objects', text="Objects")
 		col.prop_search(VRayLamp, 'include_groups',   bpy.data,      'groups',  text="Groups")
+
+		layout.prop(VRayLamp, 'use_exclude')
+		split= layout.split()
+		split.active = VRayLamp.use_exclude
+		col= split.column()
+		col.prop_search(VRayLamp, 'exclude_objects',  context.scene, 'objects', text="Objects")
+		col.prop_search(VRayLamp, 'exclude_groups',   bpy.data,      'groups',  text="Groups")
 
 
 def GetRegClasses():

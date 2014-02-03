@@ -638,11 +638,11 @@ def is_data_animated(ob):
 
 # Hex value format
 def HexFormat(value):
-    if type(value) is float:
-        bytes= struct.pack('<f', value)
-    else:
-        bytes= struct.pack('<i', value)
-    return ''.join(["%02X" % b for b in bytes])
+	if type(value) is float:
+		bytes= struct.pack('<f', value)
+	else:
+		bytes= struct.pack('<i', value)
+	return ''.join(["%02X" % b for b in bytes])
 
 
 # Transform matrix string
@@ -726,17 +726,17 @@ def get_visibility_lists(camera):
 
 
 # Generate list objects from ';' separated object and group strings
-def generate_object_list(object_names_string= None, group_names_string= None):
-	object_list= []
+def generate_object_list(object_names_string=None, group_names_string=None):
+	object_list = []
 
 	if object_names_string:
-		ob_names= object_names_string.split(';')
+		ob_names = object_names_string.split(';')
 		for ob_name in ob_names:
 			if ob_name in bpy.data.objects:
 				object_list.append(bpy.data.objects[ob_name])
 
 	if group_names_string:
-		gr_names= group_names_string.split(';')
+		gr_names = group_names_string.split(';')
 		for gr_name in gr_names:
 			if gr_name in bpy.data.groups:
 				object_list.extend(bpy.data.groups[gr_name].objects)
@@ -748,6 +748,12 @@ def generate_object_list(object_names_string= None, group_names_string= None):
 	object_list.extend(dupliGroup)
 
 	return object_list
+
+
+def GeometryObjectIt(sce):
+	for ob in sce.objects:
+		if ob.type in GEOM_TYPES:
+			yield ob
 
 
 # Generate list of data from ';' separated string

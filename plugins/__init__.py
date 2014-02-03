@@ -330,14 +330,10 @@ def add_properties():
 			default= False
 		)
 
-		include_exclude= EnumProperty(
-			name= "Type",
-			description= "Include or exclude object from lightning",
-			items= (
-				('EXCLUDE',"Exclude",""),
-				('INCLUDE',"Include",""),
-			),
-			default= 'EXCLUDE'
+		use_include= BoolProperty(
+			name= "Use Include",
+			description= "Use include",
+			default= False
 		)
 
 		include_objects= StringProperty(
@@ -348,6 +344,22 @@ def add_properties():
 		include_groups= StringProperty(
 			name= "Include groups",
 			description= "Include groups: name{;name;etc}"
+		)
+
+		use_exclude= BoolProperty(
+			name= "Use Exclude",
+			description= "Use exclude",
+			default= False
+		)
+
+		exclude_objects= StringProperty(
+			name= "Exclude objects",
+			description= "Exclude objects: name{;name;etc}"
+		)
+
+		exclude_groups= StringProperty(
+			name= "Exclude groups",
+			description= "Exclude groups: name{;name;etc}"
 		)
 
 		fallsize= FloatProperty(
