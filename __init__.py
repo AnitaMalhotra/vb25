@@ -57,8 +57,9 @@ else:
 
 
 def register():
+	from vb25 import utils
 	import _vray_for_blender
-	_vray_for_blender.start("/home/bdancer/devel/vray/vray_json")
+	_vray_for_blender.start(os.path.join(utils.get_vray_exporter_path(), "plugins_desc"))
 
 	ui.register()
 	preset.register()
