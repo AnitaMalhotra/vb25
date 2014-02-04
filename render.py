@@ -402,12 +402,12 @@ def write_settings(bus):
 			else:
 				ofile.write("\n#include \"%s\"" % (bus['filenames']['DR']['prefix'] + os.sep + os.path.basename(bus['filenames'][key])))
 		else:
-			if bus['preview'] and key in {'colorMapping', 'geometry'}:
+			if bus['preview'] and key in {'colorMapping'}:
 				if key == 'colorMapping':
 					if os.path.exists(bus['filenames'][key]):
 						ofile.write("\n#include \"%s\"" % bus['filenames'][key])
-				if key == 'geometry':
-					ofile.write("\n#include \"%s\"" % os.path.join(get_vray_exporter_path(), "preview", "preview_geometry.vrscene"))
+				# if key == 'geometry':
+				# 	ofile.write("\n#include \"%s\"" % os.path.join(get_vray_exporter_path(), "preview", "preview_geometry.vrscene"))
 			else:
 				ofile.write("\n#include \"%s\"" % os.path.basename(bus['filenames'][key]))
 	ofile.write("\n")
@@ -640,70 +640,6 @@ def	write_material(bus):
 	return ma_name
 
 
-def write_materials(bus):
-	ofile= bus['files']['materials']
-	scene= bus['scene']
-
-	ob=    bus['node']['object']
-
-	VRayScene= scene.vray
-	SettingsOptions= VRayScene.SettingsOptions
-
-	# Multi-material name
-	mtl_name = get_name(ob, prefix='OBMA')
-
-	# Reset displacement settings pointers
-	bus['node']['displacement_slot']    = None
-	bus['node']['displacement_texture'] = None
-
-	# Collecting and exporting object materials
-	mtls_list= []
-	ids_list=  []
-	ma_id= 0 # For cases with empty slots
-
-	if len(ob.material_slots):
-		for slot in ob.material_slots:
-			ma = slot.material
-			if not ma:
-				continue
-
-			bus['material'] = {}
-			bus['material']['material'] = ma
-
-			if SettingsOptions.mtl_override_on and SettingsOptions.mtl_override:
-				if not ma.vray.dontOverride:
-					bus['material']['material'] = get_data_by_name(scene, 'materials', SettingsOptions.mtl_override)
-
-			# Normal mapping settings pointer
-			bus['material']['normal_slot'] = None
-
-			# Bump mapping settings pointer
-			bus['material']['bump_slot']   = None
-
-			# Set if any texture uses object mapping
-			bus['material']['orco_suffix'] = ""
-
-			mtls_list.append(write_material(bus))
-			ma_id+= 1
-			ids_list.append(str(ma_id))
-
-	# No materials assigned - use default material
-	if len(mtls_list) == 0:
-		bus['node']['material']= bus['defaults']['material']
-
-	# Only one material - no need for Multi-material
-	elif len(mtls_list) == 1:
-		bus['node']['material']= mtls_list[0]
-
-	# Several materials assigned - need Mutli-material
-	else:
-		bus['node']['material']= mtl_name
-		ofile.write("\nMtlMulti %s {" % mtl_name)
-		ofile.write("\n\tmtls_list= List(%s);" % ','.join(mtls_list))
-		ofile.write("\n\tids_list= ListInt(%s);" % ','.join(ids_list))
-		ofile.write("\n}\n")
-
-
 def write_lamp(bus):
 	LIGHT_PORTAL= {
 		'NORMAL':  0,
@@ -908,334 +844,6 @@ def write_lamp(bus):
 			bus['lightlinker'][lamp_name]['exclude'] = generate_object_list(VRayLamp.exclude_objects, VRayLamp.exclude_groups)
 
 
-def write_node(bus):
-	scene=      bus['scene']
-	ofile=      bus['files']['nodes']
-	ob=         bus['node']['object']
-	visibility= bus['visibility']
-
-	VRayScene= scene.vray
-	SettingsOptions= VRayScene.SettingsOptions
-
-	# Lights struct proposal for support Lamps inside duplis and particles:
-	#  [{'name': vray lamp name, 'lamp': lamp_pointer}
-	#   {...}]
-	lights= []
-	for lamp in [o for o in scene.objects if o.type == 'LAMP' or o.vray.LightMesh.use]:
-		if lamp.data is None:
-			continue
-
-		if lamp.type == 'LAMP':
-			VRayLamp= lamp.data.vray
-		else:
-			VRayLamp= lamp.vray.LightMesh
-
-		lamp_name= get_name(lamp, prefix='LA')
-
-		if not object_on_visible_layers(scene, lamp) or lamp.hide_render:
-			if not scene.vray.SettingsOptions.light_doHiddenLights:
-				continue
-
-		if VRayLamp.use_include_exclude:
-			object_list= generate_object_list(VRayLamp.include_objects, VRayLamp.include_groups)
-			if VRayLamp.include_exclude == 'INCLUDE':
-				if ob in object_list:
-					append_unique(lights, lamp_name)
-			else:
-				if ob not in object_list:
-					append_unique(lights, lamp_name)
-
-		else:
-			append_unique(lights, lamp_name)
-
-	node_name= bus['node']['name']
-	matrix=    bus['node']['matrix']
-	base_mtl=  bus['node']['material']
-
-	if 'dupli' in bus['node'] and 'name' in bus['node']['dupli']:
-		node_name= bus['node']['dupli']['name']
-		matrix=    bus['node']['dupli']['matrix']
-
-	if 'particle' in bus['node'] and 'name' in bus['node']['particle']:
-		node_name= bus['node']['particle']['name']
-		matrix=    bus['node']['particle']['matrix']
-
-	if 'hair' in bus['node'] and bus['node']['hair'] == True:
-		node_name+= 'HAIR'
-
-	material = base_mtl
-
-	if not VRayScene.RTEngine.enabled and not VRayScene.RTEngine.use_opencl:
-		material = "RS%s" % node_name
-
-		ofile.write("\nMtlRenderStats %s {" % material)
-		ofile.write("\n\tbase_mtl= %s;" % base_mtl)
-		ofile.write("\n\tvisibility= %s;" %             a(scene, (0 if ob in visibility['all'] or bus['node']['visible'] == False else 1)))
-		ofile.write("\n\tcamera_visibility= %s;" %      a(scene, (0 if ob in visibility['camera']  else 1)))
-		ofile.write("\n\tgi_visibility= %s;" %          a(scene, (0 if ob in visibility['gi']      else 1)))
-		ofile.write("\n\treflections_visibility= %s;" % a(scene, (0 if ob in visibility['reflect'] else 1)))
-		ofile.write("\n\trefractions_visibility= %s;" % a(scene, (0 if ob in visibility['refract'] else 1)))
-		ofile.write("\n\tshadows_visibility= %s;" %     a(scene, (0 if ob in visibility['shadows'] else 1)))
-		ofile.write("\n}\n")
-
-	if bus['preview'] and ob.name == 'texture':
-		def getPreviewTexture(ob):
-			if not len(ob.material_slots):
-				return None
-			if not ob.material_slots[0].material:
-				return None
-			ma = ob.material_slots[0].material
-			if not len(ma.texture_slots):
-				return None
-			slot = ma.texture_slots[0]
-			if not slot.texture:
-				return None
-			tex = slot.texture
-			tex_name = clean_string("MAtextureMT00TE%s" % tex.name)
-			if tex.vray.texture_coords == 'ORCO':
-				tex_name += 'ORCOtexture'
-			return tex_name
-
-		tex_name = getPreviewTexture(ob)
-
-		if tex_name:
-			material = 'MATexPreview'
-			ofile.write("\n// Texture preview material")
-			ofile.write("\nBRDFLight BRDFTexPreview {")
-			ofile.write("\n\tcolor=%s;" % tex_name)
-			ofile.write("\n\tcolorMultiplier=3.0;")
-			ofile.write("\n}\n")
-			ofile.write("\nMtlSingleBRDF %s {" % material)
-			ofile.write("\n\tbrdf=BRDFTexPreview;")
-			ofile.write("\n}\n")
-
-	ofile.write("\nNode %s {" % node_name)
-	ofile.write("\n\tobjectID=%d;" % bus['node'].get('objectID', ob.pass_index))
-	ofile.write("\n\tgeometry=%s;" % bus['node']['geometry'])
-	ofile.write("\n\tmaterial=%s;" % material)
-	if 'particle' in bus['node'] and 'visible' in bus['node']['particle']:
-		ofile.write("\n\tvisible=%s;" % a(scene, bus['node']['particle']['visible']))
-	ofile.write("\n\ttransform=%s;" % a(scene, transform(matrix)))
-	if not bus['preview']:
-		ofile.write("\n\tlights=List(%s);" % (','.join(lights)))
-	ofile.write("\n}\n")
-
-
-def write_object(bus):
-	files= bus['files']
-	ofile= bus['files']['nodes']
-	scene= bus['scene']
-	ob=    bus['node']['object']
-
-	VRayScene=    scene.vray
-	VRayExporter= VRayScene.exporter
-	VRayObject=   ob.vray
-	VRayData=     ob.data.vray
-
-	bus['node']['name']=      get_name(ob, prefix='OB')
-	bus['node']['geometry']=  get_name(ob.data if VRayExporter.use_instances else ob, prefix='ME')
-	bus['node']['matrix']=    ob.matrix_world
-
-	# Skip if object is just dupli-group holder
-	if ob.dupli_type == 'GROUP':
-		return
-
-	# Write object materials
-	write_materials(bus)
-
-	# Write particle emitter if needed
-	# Need to be after material export
-	if len(ob.particle_systems):
-		export= True
-		for ps in ob.particle_systems:
-			if not ps.settings.use_render_emitter:
-				export= False
-		if not export:
-			return
-
-	# Write override mesh
-	if VRayData.override:
-		if VRayData.override_type == 'VRAYPROXY':
-			PLUGINS['GEOMETRY']['GeomMeshFile'].write(bus)
-
-		elif VRayData.override_type == 'VRAYPLANE':
-			bus['node']['geometry'] = get_name(ob, prefix='VRayPlane')
-			PLUGINS['GEOMETRY']['GeomPlane'].write(bus)
-
-	# Displace or Subdivision
-	if ob.vray.GeomStaticSmoothedMesh.use:
-		PLUGINS['GEOMETRY']['GeomStaticSmoothedMesh'].write(bus)
-	else:
-		PLUGINS['GEOMETRY']['GeomDisplacedMesh'].write(bus)
-
-	# Mesh-light
-	if PLUGINS['GEOMETRY']['LightMesh'].write(bus):
-		return
-
-	if VRayExporter.experimental and VRayObject.GeomVRayPattern.use:
-		PLUGINS['OBJECT']['GeomVRayPattern'].write(bus)
-
-	if 'dupli' in bus['node'] and 'material' in bus['node']['dupli']:
-		bus['node']['material'] = get_name(bus['node']['dupli']['material'], prefix='MA')
-	else:
-		complex_material= []
-		complex_material.append(bus['node']['material'])
-		for component in (VRayObject.MtlWrapper.use,
-						  VRayObject.MtlOverride.use,
-						  VRayObject.MtlRenderStats.use):
-			if component:
-				complex_material.append("OC%.2d_%s" % (len(complex_material), bus['node']['material']))
-		complex_material.reverse()
-
-		if VRayObject.MtlWrapper.use:
-			base_material= complex_material.pop()
-			ma_name= complex_material[-1]
-			ofile.write("\nMtlWrapper %s {"%(ma_name))
-			ofile.write("\n\tbase_material= %s;"%(base_material))
-			for param in PLUGINS['MATERIAL']['MtlWrapper'].PARAMS:
-				ofile.write("\n\t%s= %s;"%(param, a(scene,getattr(VRayObject.MtlWrapper,param))))
-			ofile.write("\n}\n")
-
-			bus['node']['material']= ma_name
-
-		if VRayObject.MtlOverride.use:
-			base_mtl= complex_material.pop()
-			ma_name= complex_material[-1]
-			ofile.write("\nMtlOverride %s {"%(ma_name))
-			ofile.write("\n\tbase_mtl= %s;"%(base_mtl))
-
-			for param in ('gi_mtl','reflect_mtl','refract_mtl','shadow_mtl'):
-				override_material= getattr(VRayObject.MtlOverride, param)
-				if override_material:
-					if override_material in bpy.data.materials:
-						ofile.write("\n\t%s= %s;"%(param, get_name(bpy.data.materials[override_material],"Material")))
-
-			environment_override= VRayObject.MtlOverride.environment_override
-			if environment_override:
-				if environment_override in bpy.data.materials:
-					ofile.write("\n\tenvironment_override= %s;" % get_name(bpy.data.textures[environment_override],"Texture"))
-
-			ofile.write("\n\tenvironment_priority= %i;"%(VRayObject.MtlOverride.environment_priority))
-			ofile.write("\n}\n")
-
-			bus['node']['material']= ma_name
-
-		if VRayObject.MtlRenderStats.use:
-			base_mtl= complex_material.pop()
-			ma_name= complex_material[-1]
-			ofile.write("\nMtlRenderStats %s {"%(ma_name))
-			ofile.write("\n\tbase_mtl= %s;"%(base_mtl))
-			for param in PLUGINS['MATERIAL']['MtlRenderStats'].PARAMS:
-				ofile.write("\n\t%s= %s;"%(param, a(scene,getattr(VRayObject.MtlRenderStats,param))))
-			ofile.write("\n}\n")
-
-			bus['node']['material']= ma_name
-
-	write_node(bus)
-
-
-def _write_object_particles(bus):
-	scene= bus['scene']
-	ob=    bus['node']['object']
-
-	emitter_node= bus['node']['name']
-
-	VRayScene= scene.vray
-	VRayExporter= VRayScene.exporter
-
-	if len(ob.particle_systems):
-		for ps in ob.particle_systems:
-			# if ps.settings.type == 'HAIR':
-			# 	if ps.settings.render_type not in {'OBJECT', 'GROUP', 'PATH'}:
-			# 		continue
-			# else:
-			# 	if ps.settings.render_type not in {'OBJECT', 'GROUP'}:
-			# 		continue
-
-			ps_material = "MANOMATERIALISSET"
-			ps_material_idx = ps.settings.material
-			if len(ob.material_slots) >= ps_material_idx:
-				ps_material = get_name(ob.material_slots[ps_material_idx - 1].material, prefix='MA')
-
-			if ps.settings.type == 'HAIR' and ps.settings.render_type == 'PATH':
-				if VRayExporter.use_hair:
-					hair_geom_name = clean_string("HAIR%s%s" % (ps.name, ps.settings.name))
-					hair_node_name = "Node"+hair_geom_name
-
-					if not 'export_meshes' in dir(bpy.ops.vray) or bus['preview']:
-						write_GeomMayaHair(bus, ps, hair_geom_name)
-
-					bus['node']['hair']     = True
-					bus['node']['name']     = hair_node_name
-					bus['node']['geometry'] = hair_geom_name
-					bus['node']['material'] = ps_material
-
-					write_node(bus)
-
-					bus['node']['hair'] = False
-
-
-def _write_object_dupli(bus):
-	scene = bus['scene']
-	ob    = bus['node']['object']
-
-	VRayScene = scene.vray
-	VRayExporter = VRayScene.exporter
-
-	dupli_from_particles = False
-	if len(ob.particle_systems):
-		for ps in ob.particle_systems:
-			if ps.settings.render_type in {'OBJECT', 'GROUP'}:
-				dupli_from_particles = True
-
-	nEmitterMaterials = len(ob.material_slots)
-
-	# This will fix "RuntimeError: Error: Object does not have duplis"
-	# when particle system is disabled for render
-	#
-	try:
-		if (ob.dupli_type in ('VERTS','FACES','GROUP')) or dupli_from_particles:
-			ob.dupli_list_create(bus['scene'])
-
-			for dup_id,dup_ob in enumerate(ob.dupli_list):
-				parent_dupli= ""
-
-				bus['node']['object']= dup_ob.object
-				bus['node']['base']=   ob
-
-				# Currently processed dupli name
-				dup_node_name= clean_string("OB%sDO%sID%i" % (ob.name,
-															  dup_ob.object.name,
-															  dup_id))
-				dup_node_matrix= dup_ob.matrix
-
-				# For case when dupli is inside other dupli
-				if 'dupli' in bus['node'] and 'name' in bus['node']['dupli']:
-					# Store parent dupli name
-					parent_dupli=   bus['node']['dupli']['name']
-					dup_node_name+= parent_dupli
-
-				bus['node']['dupli']=  {}
-				bus['node']['dupli']['name']=   dup_node_name
-				bus['node']['dupli']['matrix']= dup_node_matrix
-
-				if dupli_from_particles:
-					if VRayExporter.random_material:
-						random.seed(dup_id)
-						bus['node']['dupli']['material'] = ob.material_slots[random.randint(0,nEmitterMaterials-1)].material
-
-				_write_object(bus)
-
-				bus['node']['object']= ob
-				bus['node']['base']=   ob
-				bus['node']['dupli']=  {}
-				bus['node']['dupli']['name']=   parent_dupli
-
-			ob.dupli_list_clear()
-	except:
-		pass
-
-
 def writeSceneInclude(bus):
 	sceneFile = bus['files']['scene']
 
@@ -1277,30 +885,6 @@ def writeSceneInclude(bus):
 		sceneFile.write("\n\tadd_cameras=%s;" % p(VRayObject.sceneAddCameras))
 		sceneFile.write("\n\tadd_environment=%s;" % p(VRayObject.sceneAddEnvironment))
 		sceneFile.write("\n}\n")
-
-
-def _write_object(bus):
-	ob = bus['node']['object']
-
-	if ob.type in {'CAMERA','ARMATURE','LATTICE','SPEAKER'}:
-		return
-
-	# Export LAMP
-	if ob.type == 'LAMP':
-		write_lamp(bus)
-
-	elif ob.type == 'EMPTY':
-		writeSceneInclude(bus)
-		_write_object_dupli(bus)
-
-	else:
-		write_object(bus)
-		_write_object_particles(bus)
-
-		# Parent dupli_list_create() call create all duplicates
-		# even for sub duplis, so no need to process dupli again
-		if 'dupli' in bus['node'] and 'matrix' not in bus['node']['dupli']:
-			_write_object_dupli(bus)
 
 
 def write_scene(bus):
@@ -1514,16 +1098,62 @@ def write_scene(bus):
 		# TODO: Mesh lights
 
 		# Write textures
-		for tex in bpy.data.textures:
-			if bus['engine'].test_break():
-				break
+		def writeTextures(textures):
+			for tex in textures:
+				if bus['engine'].test_break():
+					break
+				bus['mtex'] = {
+					'name'    : clean_string(get_name(tex, prefix='TE')),
+					'texture' : tex,
+				}
+				write_texture(bus)
 
-			bus['mtex'] = {
-				'name'    : clean_string(get_name(tex, prefix='TE')),
-				'texture' : tex,
-			}
+		if not bus['preview']:
+			writeTextures(bpy.data.textures)
+		else:
+			texPreviewOb = scene.objects.get('texture', None)
+			if texPreviewOb and texPreviewOb.is_visible(scene):
+				# Texture preview
+				def getPreviewTexture(ob):
+					if not len(ob.material_slots):
+						return None,None
+					if not ob.material_slots[0].material:
+						return None,None
+					ma = ob.material_slots[0].material
+					if not len(ma.texture_slots):
+						return None,None
+					slot = ma.texture_slots[0]
+					if not slot.texture:
+						return None,None
+					return ma, slot.texture
 
-			write_texture(bus)
+				previewMa, previewTex = getPreviewTexture(texPreviewOb)
+				if previewTex:
+					bus['mtex'] = {
+						'name'    : clean_string(get_name(previewTex, prefix='TE')),
+						'texture' : previewTex,
+					}
+					write_texture(bus)
+
+					bus['files']['materials'].write("\n// Texture preview material")
+					bus['files']['materials'].write("\nBRDFLight BRDFTexPreview {")
+					bus['files']['materials'].write("\n\tcolor=%s;" % get_name(previewTex, prefix='TE'))
+					bus['files']['materials'].write("\n\tcolorMultiplier=1.0;")
+					bus['files']['materials'].write("\n}\n")
+					bus['files']['materials'].write("\nMtlSingleBRDF %s {" % get_name(previewMa, prefix='MA'))
+					bus['files']['materials'].write("\n\tbrdf=BRDFTexPreview;")
+					bus['files']['materials'].write("\n}\n")
+			else:
+				# Material preview
+				def previewTextures():
+					for ob in scene.objects:
+						if len(ob.material_slots):
+							for ms in ob.material_slots:
+								if ms.material:
+									for ts in ms.material.texture_slots:
+										if ts and ts.texture:
+											yield ts.texture
+				writeTextures(previewTextures())
 
 		# Write materials
 		#
@@ -1601,7 +1231,7 @@ def write_scene(bus):
 			scene   = scene.as_pointer(),
 
 			exportNodes    = True,
-			exportGeometry = False,
+			exportGeometry = True,
 
 			isAnimation   = False,
 			checkAnimated = 0,
