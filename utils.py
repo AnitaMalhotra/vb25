@@ -1062,7 +1062,7 @@ def proxy_creator(hq_filepath, vrmesh_filepath, append= False):
 
 
 def GetUserConfigDir():
-	userConfigDirpath = bpy.utils.user_resource('CONFIG')
+	userConfigDirpath = os.path.join(bpy.utils.user_resource('CONFIG'), "vrayblender")
 	if not os.path.exists(userConfigDirpath):
 		os.makedirs(userConfigDirpath)
 	return userConfigDirpath
