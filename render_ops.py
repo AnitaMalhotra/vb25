@@ -507,7 +507,7 @@ class VRAY_OT_dr_nodes_load(bpy.types.Operator):
 		VRayScene = context.scene.vray
 		VRayDR = VRayScene.VRayDR
 
-		nodesFilepath = os.path.join(GetUserConfigDir(), "vray_render_nodes.txt")
+		nodesFilepath = os.path.join(GetUserConfigDir(), "render_nodes.txt")
 
 		if not os.path.exists(nodesFilepath):
 			return {'CANCELLED'}
@@ -537,7 +537,7 @@ class VRAY_OT_dr_nodes_save(bpy.types.Operator):
 		VRayScene = context.scene.vray
 		VRayDR = VRayScene.VRayDR
 
-		nodesFilepath = os.path.join(GetUserConfigDir(), "vray_render_nodes.txt")
+		nodesFilepath = os.path.join(GetUserConfigDir(), "render_nodes.txt")
 
 		with open(nodesFilepath, 'w') as nodesFile:
 			for item in VRayDR.nodes:
