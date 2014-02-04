@@ -44,15 +44,11 @@ def write(bus):
     ofile = bus['files']['lights']
     scene = bus['scene']
 
-    ignored_lights = []
-    # ignored_shadow_lights = []
-
     if not bus['lightlinker']:
         return
 
-    from pprint import pprint
-
-    pprint(bus['lightlinker'])
+    ignored_lights = []
+    # ignored_shadow_lights = []
 
     for light in bus['lightlinker']:
         lightSettings = bus['lightlinker'][light]
