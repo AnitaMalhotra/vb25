@@ -338,12 +338,12 @@ def add_properties():
 
 		include_objects= StringProperty(
 			name= "Include objects",
-			description= "Include objects: name{;name;etc}"
+			description= "Include objects"
 		)
 
 		include_groups= StringProperty(
 			name= "Include groups",
-			description= "Include groups: name{;name;etc}"
+			description= "Include groups"
 		)
 
 		use_exclude= BoolProperty(
@@ -354,12 +354,12 @@ def add_properties():
 
 		exclude_objects= StringProperty(
 			name= "Exclude objects",
-			description= "Exclude objects: name{;name;etc}"
+			description= "Exclude objects"
 		)
 
 		exclude_groups= StringProperty(
 			name= "Exclude groups",
-			description= "Exclude groups: name{;name;etc}"
+			description= "Exclude groups"
 		)
 
 		fallsize= FloatProperty(
