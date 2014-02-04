@@ -24,9 +24,12 @@
 
 '''
 
+import os
+
 import bpy
 from bl_ui.properties_material import active_node_mat
 
+from vb25 import utils
 
 narrowui = 200
 
@@ -259,6 +262,27 @@ class VRayListMaterialSlots(bpy.types.UIList):
 		else:
 			split.label(text="")
 			split.prop(slot, 'link', text="", emboss=False, translate=False)
+
+
+class VRayPresetMenu(bpy.types.Menu):
+	preset_operator = "script.execute_preset"
+
+	def draw(self, context):
+		"""
+		Define these on the subclass
+		  - preset_subdir
+		"""
+		import bpy
+
+		presetsDirs = [ os.path.join(utils.get_vray_exporter_path(), "presets", self.preset_subdir) ]
+
+		userPresetDir = os.path.join(utils.GetUserConfigDir(), "vrayblender", "presets", self.preset_subdir)
+		if os.path.exists(userPresetDir):
+			presetsDirs.append(userPresetDir)
+
+		self.path_menu(presetsDirs,
+					   self.preset_operator,
+					   filter_ext=lambda ext: ext.lower() in {".py"})
 
 
 def GetRegClasses():
