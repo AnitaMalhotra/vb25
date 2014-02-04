@@ -276,7 +276,7 @@ class VRayPresetMenu(bpy.types.Menu):
 
 		presetsDirs = [ os.path.join(utils.get_vray_exporter_path(), "presets", self.preset_subdir) ]
 
-		userPresetDir = os.path.join(utils.GetUserConfigDir(), "vrayblender", "presets", self.preset_subdir)
+		userPresetDir = os.path.join(utils.GetUserConfigDir(), "presets", self.preset_subdir)
 		if os.path.exists(userPresetDir):
 			presetsDirs.append(userPresetDir)
 
