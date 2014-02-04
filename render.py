@@ -393,7 +393,7 @@ def write_settings(bus):
 		bus['files']['scene'].write("\n}\n")
 
 	for key in bus['filenames']:
-		if key in ('output', 'output_filename', 'output_loadfile', 'lightmaps', 'scene', 'DR'):
+		if key in {'output', 'output_filename', 'output_loadfile', 'lightmaps', 'scene', 'DR'}:
 			# Skip some files
 			continue
 		if VRayDR.on and not SettingsOptions.misc_transferAssets:
