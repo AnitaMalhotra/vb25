@@ -1952,8 +1952,10 @@ def remove_properties():
 	for pluginType in PLUGINS:
 		for plugin in PLUGINS[pluginType]:
 			if hasattr(PLUGINS[pluginType][plugin], 'unregister'):
-				dbg.msg("%s.unregister()" % PLUGINS[pluginType][plugin].__name__)
-				PLUGINS[pluginType][plugin].unregister()
+				plugin = PLUGINS[pluginType][plugin]
+				dbg.msg("%s.unregister()" % plugin.__name__)
+				plugin.unregister()
+				del plugin
 
 	del bpy.types.Camera.vray
 	del bpy.types.Lamp.vray
