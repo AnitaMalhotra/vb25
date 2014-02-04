@@ -61,6 +61,7 @@ def register():
 	_vray_for_blender.start("/home/bdancer/devel/vray/vray_json")
 
 	ui.register()
+	preset.register()
 	events.register()
 	plugins.add_properties()
 	render_ops.register()
@@ -73,4 +74,5 @@ def unregister():
 	render_ops.unregister()
 	plugins.remove_properties()
 	events.unregister()
+	preset.unregister()
 	ui.unregister()
