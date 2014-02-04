@@ -52,11 +52,9 @@ class VRAY_MT_preview(VRayMaterialPanel, bpy.types.Panel):
 		self.layout.template_preview(context.material, show_buttons = False)
 
 
-class VRAY_MT_preset_material(bpy.types.Menu):
-	bl_label= "Material Presets"
-	preset_subdir= os.path.join("..", "startup", "vb25", "presets", "material")
-	preset_operator = "script.execute_preset"
-	draw = bpy.types.Menu.draw_preset
+class VRAY_MT_preset_material(VRayPresetMenu):
+	bl_label = "Material Presets"
+	preset_subdir = "material"
 
 
 class VRAY_MP_context_material(VRayMaterialPanel, bpy.types.Panel):
