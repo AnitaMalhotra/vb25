@@ -1046,7 +1046,18 @@ def write_scene(bus):
 						if ob not in exclude_list:
 							exclude_list.append(ob)
 
-	def write_frame(bus, firstFrame=False, checkAnimated='NONE'):
+	def write_frame(bus, firstFrame=True, checkAnimated='NONE'):
+		def isAnimated(o):
+			if firstFrame:
+				return True
+			if checkAnimated in {'NONE'}:
+				return True
+			if o.animation_data is None:
+				return False
+			if o.animation_data.action is None:
+				return False
+			return True
+
 		scene = bus['scene']
 
 		VRayScene       = scene.vray
@@ -1081,10 +1092,8 @@ def write_scene(bus):
 			if ob.type not in {'LAMP'}:
 				continue
 
-			if not firstFrame:
-				if checkAnimated not in {'NONE'}:
-					if not (ob.animation_data or ob.data.animation_data):
-						continue
+			if not (isAnimated(ob) or isAnimated(ob.data)):
+				continue
 
 			bus['node'].update({
 				'object'   : ob, # Currently processes object
@@ -1103,14 +1112,14 @@ def write_scene(bus):
 			for tex in textures:
 				if bus['engine'].test_break():
 					break
-				if not firstFrame:
-					if checkAnimated not in {'NONE'}:
-						if not tex.animation_data:
-							continue
 				bus['mtex'] = {
 					'name'    : clean_string(get_name(tex, prefix='TE')),
 					'texture' : tex,
 				}
+				if not isAnimated(tex):
+					# Material export will take tex from bus['cache']['textures']
+					append_unique(bus['cache']['textures'], bus['mtex']['name'])
+					continue
 				write_texture(bus)
 
 		if not bus['preview']:
@@ -1176,10 +1185,8 @@ def write_scene(bus):
 		for ma in materials:
 			if bus['engine'].test_break():
 				break
-			if not firstFrame:
-				if checkAnimated not in {'NONE'}:
-					if not ma.animation_data:
-						continue
+			if not isAnimated(ma):
+				continue
 
 			bus['material'] = {}
 			bus['material']['material'] = ma
