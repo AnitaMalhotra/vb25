@@ -255,7 +255,7 @@ def add_properties(rna_pointer):
 
 
 
-def write(bus):
+def write(bus, ob):
 	LIGHT_PORTAL= {
 		'NORMAL':  0,
 		'PORTAL':  1,
@@ -273,8 +273,6 @@ def write(bus):
 	scene= bus['scene']
 	ofile= bus['files']['lights']
 
-	ob=    bus['node']['object']
-
 	VRayObject= ob.vray
 	LightMesh=  VRayObject.LightMesh
 
@@ -284,25 +282,25 @@ def write(bus):
 	textures= bus.get('textures', {})
 
 	ofile.write("\nLightMesh %s {" % get_name(ob, prefix='LA'))
-	ofile.write("\n\ttransform= %s;" % a(scene,transform(bus['node']['matrix'])))
+	ofile.write("\n\ttransform=%s;" % a(scene,transform(ob.matrix_world)))
 	for param in PARAMS:
 		if param == 'color':
 			if LightMesh.color_type == 'RGB':
 				color= LightMesh.color
 			else:
 				color= kelvin_to_rgb(LightMesh.temperature)
-			ofile.write("\n\tcolor= %s;" % a(scene, "Color(%.6f,%.6f,%.6f)"%(tuple(color))))
+			ofile.write("\n\tcolor=%s;" % a(scene, "Color(%.6f,%.6f,%.6f)"%(tuple(color))))
 			if 'diffuse' in textures:
-				ofile.write("\n\ttex= %s;" % textures['diffuse'])
+				ofile.write("\n\ttex=%s;" % textures['diffuse'])
 				ofile.write("\n\tuse_tex= 1;")
 		elif param == 'geometry':
-			ofile.write("\n\t%s= %s;"%(param, bus['node']['geometry']))
+			ofile.write("\n\t%s=%s;"%(param, get_name(ob.data, prefix='ME')))
 		elif param == 'units':
-			ofile.write("\n\t%s= %i;"%(param, UNITS[LightMesh.units]))
+			ofile.write("\n\t%s=%i;"%(param, UNITS[LightMesh.units]))
 		elif param == 'lightPortal':
-			ofile.write("\n\t%s= %i;"%(param, LIGHT_PORTAL[LightMesh.lightPortal]))
+			ofile.write("\n\t%s=%i;"%(param, LIGHT_PORTAL[LightMesh.lightPortal]))
 		else:
-			ofile.write("\n\t%s= %s;"%(param, a(scene,getattr(LightMesh,param))))
+			ofile.write("\n\t%s=%s;"%(param, a(scene,getattr(LightMesh,param))))
 	ofile.write("\n}\n")
 
 	return True

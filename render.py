@@ -1047,6 +1047,11 @@ def write_scene(bus):
 							exclude_list.append(ob)
 
 	def write_frame(bus, firstFrame=True, checkAnimated='NONE'):
+		def isMeshLight(ob):
+			if ob.type in GEOM_TYPES and ob.vray.LightMesh.use:
+				return True
+			return False
+
 		def isAnimated(o):
 			if firstFrame:
 				return True
@@ -1083,29 +1088,6 @@ def write_scene(bus):
 		_vray_for_blender.clearCache()
 
 		timerStart = time.clock()
-
-		# Write lights
-		for ob in bpy.context.scene.objects:
-			if bus['engine'].test_break():
-				break
-
-			if ob.type not in {'LAMP'}:
-				continue
-
-			if not (isAnimated(ob) or isAnimated(ob.data)):
-				continue
-
-			bus['node'].update({
-				'object'   : ob, # Currently processes object
-				'visible'  : ob, # Object visibility
-				'base'     : ob, # Attributes for particle / dupli export
-				'dupli'    : {},
-				'particle' : {},
-			})
-
-			write_lamp(bus)
-
-		# TODO: Mesh lights
 
 		# Write textures
 		def writeTextures(textures):
@@ -1205,6 +1187,31 @@ def write_scene(bus):
 			bus['material']['orco_suffix'] = ""
 
 			write_material(bus)
+
+		# Write lights
+		for ob in bpy.context.scene.objects:
+			if bus['engine'].test_break():
+				break
+
+			if ob.type not in {'LAMP'} and not isMeshLight(ob):
+				continue
+
+			if not (isAnimated(ob) or isAnimated(ob.data)):
+				continue
+
+			if isMeshLight(ob):
+				PLUGINS['GEOMETRY']['LightMesh'].write(bus, ob)
+			else:
+				bus['node'].update({
+					'object'   : ob, # Currently processes object
+					'visible'  : ob, # Object visibility
+					'base'     : ob, # Attributes for particle / dupli export
+					'dupli'    : {},
+					'particle' : {},
+				})
+				write_lamp(bus)
+
+		# TODO: Mesh lights
 
 		# Write settings
 		if firstFrame:
