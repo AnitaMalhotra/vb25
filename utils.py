@@ -580,7 +580,13 @@ def a(scene, t):
 	if VRayScene.RTEngine.enabled:
 		return p(t)
 
-	if VRayExporter.animation or VRayExporter.camera_loop or VRayExporter.use_still_motion_blur:
+	if VRayExporter.animation:
+		if scene.frame_current == scene.frame_start:
+			return p(t)
+		else:
+			return "interpolate((%i,%s))" % (frame, p(t))
+
+	if VRayExporter.camera_loop or VRayExporter.use_still_motion_blur:
 		return "interpolate((%i,%s))" % (frame, p(t))
 
 	return p(t)
