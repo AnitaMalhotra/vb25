@@ -1046,7 +1046,7 @@ def write_scene(bus):
 						if ob not in exclude_list:
 							exclude_list.append(ob)
 
-	def write_frame(bus, checkAnimated='NONE'):
+	def write_frame(bus, firstFrame=False, checkAnimated='NONE'):
 		scene = bus['scene']
 
 		VRayScene       = scene.vray
@@ -1081,9 +1081,10 @@ def write_scene(bus):
 			if ob.type not in {'LAMP'}:
 				continue
 
-			if checkAnimated not in {'NONE'}:
-				if not (ob.animation_data or ob.data.animation_data):
-					continue
+			if not firstFrame:
+				if checkAnimated not in {'NONE'}:
+					if not (ob.animation_data or ob.data.animation_data):
+						continue
 
 			bus['node'].update({
 				'object'   : ob, # Currently processes object
@@ -1102,6 +1103,10 @@ def write_scene(bus):
 			for tex in textures:
 				if bus['engine'].test_break():
 					break
+				if not firstFrame:
+					if checkAnimated not in {'NONE'}:
+						if not tex.animation_data:
+							continue
 				bus['mtex'] = {
 					'name'    : clean_string(get_name(tex, prefix='TE')),
 					'texture' : tex,
@@ -1171,10 +1176,10 @@ def write_scene(bus):
 		for ma in materials:
 			if bus['engine'].test_break():
 				break
-
-			if checkAnimated not in {'NONE'}:
-				if not ma.animation_data:
-					continue
+			if not firstFrame:
+				if checkAnimated not in {'NONE'}:
+					if not ma.animation_data:
+						continue
 
 			bus['material'] = {}
 			bus['material']['material'] = ma
@@ -1195,7 +1200,7 @@ def write_scene(bus):
 			write_material(bus)
 
 		# Write settings
-		if checkAnimated == 'NONE':
+		if firstFrame:
 			write_settings(bus)
 
 		# TODO: Add camera animation detection
@@ -1208,7 +1213,7 @@ def write_scene(bus):
 		# SphereFade could be animated
 		# We already export SphereFade data in settings export,
 		# so skip first frame
-		if checkAnimated not in {'NONE'}:
+		if not firstFrame:
 			PLUGINS['SETTINGS']['SettingsEnvironment'].WriteSphereFade(bus)
 
 		debug(scene, "Writing lights, materials and settings in %.2f" % (time.clock() - timerStart))
@@ -1276,7 +1281,7 @@ def write_scene(bus):
 				return
 			scene.frame_set(f)
 			bus['check_animated'] = VRayExporter.check_animated
-			write_frame(bus, checkAnimated=VRayExporter.check_animated)
+			write_frame(bus, firstFrame=(f==scene.frame_start), checkAnimated=VRayExporter.check_animated)
 			f += scene.frame_step
 
 		# Restore selected frame
@@ -1633,7 +1638,7 @@ def init_bus(engine, scene, preview = False):
 
 	bus['lightlinker'] = {}
 
-	bus['check_animated'] = 'NONE'
+	bus['check_animated'] = VRayExporter.check_animated
 	bus['anim'] = set()
 
 	init_files(bus)
