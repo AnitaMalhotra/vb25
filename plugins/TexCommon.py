@@ -49,7 +49,7 @@ def update_blender_mapping_type(self, context):
 		return
 	if not context.texture_slot:
 		return
-	if self.texture_coords == 'WORLD':
+	if self.texture_coords in {'WORLD','ENV'}:
 		return
 	context.texture_slot.texture_coords = self.texture_coords
 
@@ -67,9 +67,10 @@ def add_properties(rna_pointer):
 		name= "Coords",
 		description= "Image texure placement type",
 		items= (
-			('ORCO',  "Object", "Generated coordinates."),
-			('UV',    "UV",     "Mesh UV coordinates."),
-			('WORLD', "World",  "World coordinates."),
+			('ORCO',  "Object",       "Generated coordinates"),
+			('UV',    "UV",           "Mesh UV coordinates"),
+			('WORLD', "World",        "World coordinates"),
+			('ENV',   "Environment",  "Environment mapping"),
 		),
 		default= 'ORCO',
 		update= update_blender_mapping_type
@@ -520,9 +521,10 @@ class VRAY_TP_Mapping(ui.VRayTexturePanel, bpy.types.Panel):
 
 		TexPlugin= getattr(VRayTexture, VRayTexture.type) if tex.type == 'VRAY' else None
 
-		if issubclass(type(idblock), bpy.types.Material):
-			layout.prop(VRayTexture, 'texture_coords', expand=wide_ui)
+		layout.prop(VRayTexture, 'texture_coords', expand=wide_ui)
+		layout.separator()
 
+		if VRayTexture.texture_coords in {'UV','ORCO'}:
 			if VRayTexture.texture_coords == 'UV':
 				split= layout.split(percentage=0.3)
 				split.label(text="Layer:")
@@ -597,19 +599,7 @@ class VRAY_TP_Mapping(ui.VRayTexturePanel, bpy.types.Panel):
 				col.prop(VRayTexture, 'uv_noise_levels')
 				col.prop(VRayTexture, 'uv_noise_size')
 
-		elif issubclass(type(idblock), bpy.types.World):
-			split= layout.split(percentage=0.3)
-			split.label(text="Projection:")
-			split.prop(VRayTexture, 'environment_mapping', text="")
-
-			layout.label(text="Rotation:")
-			split= layout.split()
-			col= split.column()
-			col.prop(VRaySlot, 'texture_rotation_h', slider= True, text="Horizontal")
-			col.prop(VRaySlot, 'texture_rotation_v', slider= True, text="Vertical")
-			#col.prop(VRaySlot, 'texture_rotation_w', slider= True, text="X")
-
-		elif issubclass(type(idblock), bpy.types.Lamp):
+		elif VRayTexture.texture_coords in {'ENV'}:
 			split= layout.split(percentage=0.3)
 			split.label(text="Projection:")
 			split.prop(VRayTexture, 'environment_mapping', text="")

@@ -176,15 +176,15 @@ def write_UVWGenEnvironment(bus):
 
 
 def write_uvwgen(bus):
-	texture= bus['mtex']['texture']
+	texture = bus['mtex']['texture']
 
-	if 'dome' in bus['mtex'] and bus['mtex']['dome']:
+	VRayTexture = texture.vray
+
+	if VRayTexture.texture_coords in {'ENV'}:
 		return write_UVWGenEnvironment(bus)
 
 	else:
-		VRayTexture= texture.vray
-
-		uvwgen= write_UVWGenChannel(bus)
+		uvwgen = write_UVWGenChannel(bus)
 
 		# Cache uvwgen under texture name
 		bus['cache']['uvwgen'][ bus['mtex']['name'] ]= uvwgen
@@ -193,4 +193,5 @@ def write_uvwgen(bus):
 		if 'material' in bus:
 			bus['material']['normal_uvwgen'] = uvwgen
 			bus['material']['bump_uvwgen']   = uvwgen
+
 		return uvwgen
