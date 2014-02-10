@@ -1196,6 +1196,10 @@ def write_scene(bus):
 			if ob.type not in {'LAMP'} and not isMeshLight(ob):
 				continue
 
+			if not object_on_visible_layers(scene, ob) or ob.hide_render:
+				if not scene.vray.SettingsOptions.light_doHiddenLights:
+					continue
+
 			if not (isAnimated(ob) or isAnimated(ob.data)):
 				continue
 
