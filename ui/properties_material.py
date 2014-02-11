@@ -49,7 +49,7 @@ class VRAY_MT_preview(VRayMaterialPanel, bpy.types.Panel):
 		return engine_poll(__class__, context)
 
 	def draw(self, context):
-		self.layout.template_preview(context.material, show_buttons = False)
+		self.layout.template_preview(context.material, show_buttons=True)
 
 
 class VRAY_MT_preset_material(VRayPresetMenu):
