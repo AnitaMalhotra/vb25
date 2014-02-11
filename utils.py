@@ -494,7 +494,7 @@ def get_ram_basedir():
 
 # Colorize sting on Linux
 def color(text, color=None):
-	if not color or not PLATFORM == 'linux':
+	if not color or PLATFORM == 'win32':
 		return text
 	if color == 'green':
 		return "\033[0;32m%s\033[0m" % text
