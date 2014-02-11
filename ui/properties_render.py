@@ -227,7 +227,11 @@ class VRAY_RP_render(VRayRenderPanel, bpy.types.Panel):
 			render_label= "Render Image"
 			render_icon= 'RENDER_STILL'
 
-		layout.operator('render.render', text=render_label, icon=render_icon)
+		split = layout.split()
+		row = split.row(align=True)
+		row.operator('render.render', text=render_label, icon=render_icon)
+		row.prop(rd, "use_lock_interface", text="")
+
 		layout.prop(VRayExporter, 'auto_meshes', text="Re-Export Meshes")
 
 		if VRayExporter.animation:
@@ -353,7 +357,6 @@ class VRAY_RP_exporter(VRayRenderPanel, bpy.types.Panel):
 		col= split.column()
 		col.label(text="Options:")
 		col.prop(ve, 'autorun')
-		col.prop(ve, 'auto_meshes')
 		col.prop(ve, 'display')
 		col.prop(ve, 'autoclose')
 		col.prop(ve, 'debug')
