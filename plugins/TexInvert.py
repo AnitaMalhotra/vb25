@@ -80,7 +80,6 @@ def write(bus):
 	scene    = bus['scene']
 	ofile    = bus['files']['textures']
 
-	slot     = bus['mtex']['slot']
 	texture  = bus['mtex']['texture']
 	tex_name = bus['mtex']['name']
 
