@@ -1302,6 +1302,8 @@ def write_scene(bus):
 			write_frame(bus, firstFrame=(f==scene.frame_start), checkAnimated=VRayExporter.check_animated)
 			f += scene.frame_step
 
+			_vray_for_blender.clearCache()
+
 		# Restore selected frame
 		scene.frame_set(selected_frame)
 
