@@ -1059,8 +1059,8 @@ def write_scene(bus):
 				return True
 			if o.animation_data and o.animation_data.action:
 				return True
-			elif ob.parent:
-				return isAnimated(ob.parent)
+			elif o.parent:
+				return isAnimated(o.parent)
 			return False
 
 		scene = bus['scene']
