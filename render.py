@@ -1059,7 +1059,7 @@ def write_scene(bus):
 				return True
 			if o.animation_data and o.animation_data.action:
 				return True
-			elif o.parent:
+			elif hasattr(o, 'parent') and o.parent:
 				return isAnimated(o.parent)
 			return False
 
