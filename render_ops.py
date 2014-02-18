@@ -73,9 +73,9 @@ class VRAY_OT_update(bpy.types.Operator):
 			return {'CANCELLED'}
 
 		# Downloading file
-		self.report({'INFO'}, "Downloading 'master' branch archive...")
+		self.report({'INFO'}, "Downloading 'dev/animation' branch archive...")
 
-		GIT_MASTER_URL = "https://github.com/bdancer/vb25/zipball/master"
+		GIT_MASTER_URL = "https://github.com/bdancer/vb25/zipball/dev/animation"
 
 		# devnote: urllib2 not available, urllib's fancyurlopener returns errors anyways (when connection is not available)
 		# so this is a working 'ugly fix' that at leasts works. Sorry the ghetto fix.
