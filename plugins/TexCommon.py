@@ -49,9 +49,13 @@ def update_blender_mapping_type(self, context):
 		return
 	if not context.texture_slot:
 		return
-	if self.texture_coords in {'WORLD','ENV'}:
-		return
-	context.texture_slot.texture_coords = self.texture_coords
+	blender_type = {
+		'ORCO'  : 'ORCO',
+		'UV'    : 'UV',
+		'WORLD' : 'OBJECT',
+		'ENV'   : 'GLOBAL',
+	}
+	context.texture_slot.texture_coords = blender_type[self.texture_coords]
 
 
 def add_properties(rna_pointer):
@@ -528,8 +532,8 @@ class VRAY_TP_Mapping(ui.VRayTexturePanel, bpy.types.Panel):
 			if VRayTexture.texture_coords == 'UV':
 				split= layout.split(percentage=0.3)
 				split.label(text="Layer:")
-				if ob and ob.type == 'MESH':
-					split.prop_search(VRaySlot,    'uv_layer',
+				if ob and ob.data and hasattr(ob.data, 'uv_textures'):
+					split.prop_search(VRaySlot, 'uv_layer',
 									  ob.data, 'uv_textures',
 									  text="")
 				else:
