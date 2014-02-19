@@ -113,14 +113,14 @@ def write_UVWGenChannel(bus):
 		uvwgen = write_UVWGenPlanarWorld(bus)
 
 	ofile.write("\nUVWGenMayaPlace2dTexture %s {" % uvw_name)
-	if bus['preview']:
+	if bus['preview'] or not VRaySlot.uv_layer:
 		ofile.write('\n\tuvw_channel=0;')
 	else:
-		ofile.write('\n\tuv_set_name="%s";' % (VRaySlot.uv_layer if VRaySlot.uv_layer else "UVMap"))
-		ofile.write("\n\ttranslate_frame_u=%.3f;" % VRaySlot.offset[0])
-		ofile.write("\n\ttranslate_frame_v=%.3f;" % VRaySlot.offset[1])
-		# ofile.write("\n\tcoverage_u=%.3f;" % VRaySlot.scale[0])
-		# ofile.write("\n\tcoverage_v=%.3f;" % VRaySlot.scale[1])
+		ofile.write('\n\tuv_set_name="%s";' % VRaySlot.uv_layer)
+	ofile.write("\n\ttranslate_frame_u=%.3f;" % VRaySlot.offset[0])
+	ofile.write("\n\ttranslate_frame_v=%.3f;" % VRaySlot.offset[1])
+	# ofile.write("\n\tcoverage_u=%.3f;" % VRaySlot.scale[0])
+	# ofile.write("\n\tcoverage_v=%.3f;" % VRaySlot.scale[1])
 	ofile.write("\n\tmirror_u=%d;" % VRayTexture.mirror_u)
 	ofile.write("\n\tmirror_v=%d;" % VRayTexture.mirror_v)
 	ofile.write("\n\trepeat_u=%.3f;" % VRayTexture.tile_u)
