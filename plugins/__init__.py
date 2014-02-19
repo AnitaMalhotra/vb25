@@ -123,6 +123,13 @@ def add_properties():
 	bpy.utils.register_class(VRayCamera)
 
 	class VRayObject(bpy.types.PropertyGroup):
+		dupliGroupIDOverride = IntProperty(
+			name        = "Dupli Group ID Override",
+			description = "Override \"Object ID\" for the whole Dupli Group. 0 - means no override",
+			min         = 0,
+			default     = 0
+		)
+
 		overrideWithScene = BoolProperty(
 			name        = "Override With VRScene Asset",
 			description = "Override with *.vrscene asset",
