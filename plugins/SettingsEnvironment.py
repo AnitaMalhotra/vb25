@@ -31,6 +31,8 @@ import mathutils
 from bpy.props import *
 
 ''' vb modules '''
+import _vray_for_blender
+
 from vb25.ui      import ui
 from vb25.plugins import *
 from vb25.utils   import *
@@ -873,10 +875,19 @@ def write(bus):
 	VRayExporter= VRayScene.exporter
 
 	def write_EnvFogMeshGizmo(bus, ob):
-		name= "MG%s" % get_name(ob, prefix='OB')
+		name     = "FogGizmo%s"  % get_name(ob, prefix='OB')
+		meshName = "MeshGizmo%s" % get_name(ob, prefix='OB')
+
+		_vray_for_blender.exportMesh(
+			bpy.context.as_pointer(), # Context
+			ob.as_pointer(),          # Object
+			meshName,                 # Result plugin name
+			None,                     # propGroup
+			bus['files']['geometry']  # Output file
+		)
 
 		ofile.write("\nEnvFogMeshGizmo %s {" % name)
-		ofile.write("\n\tgeometry= %s;" % get_name(ob.data if VRayExporter.use_instances else ob, prefix='ME'))
+		ofile.write("\n\tgeometry= %s;" % meshName)
 		ofile.write("\n\ttransform= %s;" % a(scene, transform(ob.matrix_world)))
 		#ofile.write("\n\tlights= List(%s);" % )
 		#ofile.write("\n\tfade_out_radius= %s;" % )
