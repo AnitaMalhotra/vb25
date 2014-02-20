@@ -1030,21 +1030,18 @@ def write_scene(bus):
 	bus['effects']['toon']['objects']= []
 
 	# Prepare exclude for effects
-	# TODO: Pass this list to C++ expoter
 	#
-	exclude_list= []
-	VRayEffects=  VRayScene.VRayEffects
+	exclude_list = []
+	VRayEffects  = VRayScene.VRayEffects
 	if VRayEffects.use:
 		for effect in VRayEffects.effects:
 			if effect.use:
 				if effect.type == 'FOG':
-					EnvironmentFog= effect.EnvironmentFog
-					fog_objects= generate_object_list(EnvironmentFog.objects, EnvironmentFog.groups)
+					EnvironmentFog = effect.EnvironmentFog
+					fog_objects = generate_object_list(EnvironmentFog.objects, EnvironmentFog.groups)
 					for ob in fog_objects:
-						if not object_visible(bus, ob):
-							continue
 						if ob not in exclude_list:
-							exclude_list.append(ob)
+							exclude_list.append(ob.as_pointer())
 
 	def write_frame(bus, firstFrame=True, checkAnimated='NONE'):
 		def isMeshLight(ob):
@@ -1084,6 +1081,7 @@ def write_scene(bus):
 		bus['node'] = {}
 
 		# Write objects and geometry
+		_vray_for_blender.setSkipObjects(bus['exporter'], exclude_list)
 		_vray_for_blender.exportScene(bus['exporter'])
 		_vray_for_blender.clearCache()
 
