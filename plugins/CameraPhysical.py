@@ -366,12 +366,7 @@ def write(bus):
 	VRayCamera=     camera.data.vray
 	CameraPhysical= VRayCamera.CameraPhysical
 
-	fov= VRayCamera.fov if VRayCamera.override_fov else camera.data.angle
-
-	aspect= scene.render.resolution_x / scene.render.resolution_y
-
-	if aspect < 1.0:
-		fov= fov * aspect
+	fov, orthoWidth = get_camera_fov(scene, camera)
 
 	focus_distance= camera.data.dof_distance
 	if camera.data.dof_object:

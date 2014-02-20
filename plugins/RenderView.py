@@ -80,14 +80,7 @@ def write(bus):
 	SettingsCamera = VRayCamera.SettingsCamera
 
 	if not VRayBake.use:
-		fov = VRayCamera.fov if VRayCamera.override_fov else camera.data.angle
-
-		aspect = float(scene.render.resolution_x) / float(scene.render.resolution_y)
-		orthoWidth = camera.data.ortho_scale
-
-		if aspect < 1.0:
-			fov        = fov * aspect
-			orthoWidth = float(orthoWidth) * aspect
+		fov, orthoWidth = get_camera_fov(scene, camera)
 
 		tm = camera.matrix_world.normalized()
 

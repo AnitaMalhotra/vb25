@@ -731,6 +731,21 @@ def get_visibility_lists(camera):
 	return visibility
 
 
+def get_camera_fov(sce, ca):
+	VRayCamera = ca.data.vray
+
+	fov = VRayCamera.fov if VRayCamera.override_fov else ca.data.angle
+
+	aspect     = sce.render.resolution_x / sce.render.resolution_y
+	orthoWidth = ca.data.ortho_scale
+
+	if aspect < 1.0:
+		fov = 2 * math.atan(math.tan(fov/2.0) * aspect)
+		orthoWidth *= aspect
+
+	return fov, orthoWidth
+
+
 # Generate list objects from ';' separated object and group strings
 def generate_object_list(object_names_string=None, group_names_string=None):
 	object_list = []

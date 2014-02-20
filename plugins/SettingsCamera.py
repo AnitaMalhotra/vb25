@@ -123,14 +123,7 @@ def write(bus):
 	SettingsCamera = VRayCamera.SettingsCamera
 	CameraPhysical = VRayCamera.CameraPhysical
 
-	fov = VRayCamera.fov if VRayCamera.override_fov else camera.data.angle
-
-	aspect = scene.render.resolution_x / scene.render.resolution_y
-	orthoWidth = camera.data.ortho_scale
-
-	if aspect < 1.0:
-		fov = fov * aspect
-		orthoWidth = float(orthoWidth) * aspect
+	fov, orthoWidth = get_camera_fov(scene, camera)
 
 	ofile.write("\n// Camera: %s" % (camera.name))
 	ofile.write("\nSettingsCamera CA%s {" % clean_string(camera.name))

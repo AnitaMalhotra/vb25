@@ -985,11 +985,15 @@ def add_properties():
 
 		offset = FloatVectorProperty(
 			subtype = 'TRANSLATION',
+			size = 2,
+			default = (0.0,0.0),
 		)
 
 		scale = FloatVectorProperty(
+			name = "Coverage",
 			subtype = 'TRANSLATION',
-			default = (1.0,1.0,1.0),
+			size = 2,
+			default = (1.0,1.0),
 		)
 
 		# Move to Slot plugin
