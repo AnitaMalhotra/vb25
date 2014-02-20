@@ -392,7 +392,10 @@ def write(bus):
 				value= getattr(CameraPhysical,param)
 			ofile.write("\n\t%s= %s;"%(param, a(scene,value)))
 
-		ofile.write("\n\thorizontal_offset= %s;" % a(scene, -camera.data.shift_x))
-		ofile.write("\n\tvertical_offset= %s;"   % a(scene, -camera.data.shift_y))
+		aspect = scene.render.resolution_x / scene.render.resolution_y
+		mult = 1.72 if aspect < 1.0 else 1.0
+
+		ofile.write("\n\thorizontal_offset= %s;" % a(scene, -camera.data.shift_x * mult))
+		ofile.write("\n\tvertical_offset= %s;"   % a(scene, -camera.data.shift_y * mult))
 		ofile.write("\n}\n")
 
