@@ -331,7 +331,7 @@ def add_properties(rna_pointer):
 		description = "Tile in U",
 		min         = 0.0,
 		max         = 1000.0,
-		soft_min    = 1,
+		soft_min    = 0.001,
 		soft_max    = 20.0,
 		default     = 1.0
 	)
@@ -347,7 +347,7 @@ def add_properties(rna_pointer):
 		description = "Tile in V",
 		min         = 0.0,
 		max         = 1000.0,
-		soft_min    = 1.0,
+		soft_min    = 0.001,
 		soft_max    = 20.0,
 		default     = 1.0
 	)
@@ -559,7 +559,7 @@ class VRAY_TP_Mapping(ui.VRayTexturePanel, bpy.types.Panel):
 
 			split= layout.split()
 			col= split.column()
-			col.label(text="Scale:")
+			col.label(text="Coverage:")
 			if wide_ui:
 				sub= col.row()
 			else:
@@ -614,7 +614,12 @@ class VRAY_TP_Mapping(ui.VRayTexturePanel, bpy.types.Panel):
 			col.prop(VRaySlot, 'texture_rotation_h', slider= True, text="Horizontal")
 			col.prop(VRaySlot, 'texture_rotation_v', slider= True, text="Vertical")
 			#col.prop(VRaySlot, 'texture_rotation_w', slider= True, text="X")
-
+		elif VRayTexture.texture_coords in {'WORLD'}:
+			split= layout.split(percentage=0.3)
+			split.label(text="Object:")
+			split.prop_search(VRayTexture, 'object',
+							  sce,         'objects',
+							  text="")
 
 
 class VRAY_TP_Tiling(ui.VRayTexturePanel, bpy.types.Panel):
@@ -668,14 +673,11 @@ class VRAY_TP_Tiling(ui.VRayTexturePanel, bpy.types.Panel):
 			col.label(text="Tile:")
 			sub= col.row(align=True)
 			sub_u= sub.row()
-			sub_u.active= VRayTexture.tile in ('TILEUV','TILEU')
+			sub_u.active= VRayTexture.tile in {'TILEUV', 'TILEU'}
 			sub_u.prop(VRayTexture, 'tile_u', text='U')
 			sub_v= sub.row()
-			sub_v.active= VRayTexture.tile in ('TILEUV','TILEV')
+			sub_v.active= VRayTexture.tile in {'TILEUV', 'TILEV'}
 			sub_v.prop(VRayTexture, 'tile_v', text='V')
-
-			if wide_ui:
-				col= split.column()
 
 			col.label(text="Mirror:")
 			sub= col.row(align=True)
