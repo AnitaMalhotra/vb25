@@ -56,6 +56,8 @@ PLATFORM= sys.platform
 HOSTNAME= socket.gethostname()
 
 PURE_PROCEDURAL= (
+	'TexSky',
+	'TexMeshVertexColorChannel',
 	'TexDistance',
 	'TexDirt',
 	'TexEdges',
