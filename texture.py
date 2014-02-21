@@ -130,7 +130,6 @@ def write_texture(bus):
 		return PLUGINS['TEXTURE'][VRayTexture.type].write(bus)
 
 	else:
-		debug(scene, "Texture \"%s\": \'%s\' type is not supported." % (texture.name, texture.type), error=True)
 		return None
 
 
