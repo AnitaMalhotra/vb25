@@ -56,6 +56,7 @@ PLATFORM= sys.platform
 HOSTNAME= socket.gethostname()
 
 PURE_PROCEDURAL= (
+	'TexDistance',
 	'TexDirt',
 	'TexEdges',
 	'TexFalloff',
