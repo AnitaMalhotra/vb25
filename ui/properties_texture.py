@@ -380,6 +380,21 @@ def GetRegClasses():
 
 
 def register():
+	import bl_ui.properties_texture as proptex
+	blTexturePanels = (proptex.TEXTURE_PT_image,
+					proptex.TEXTURE_PT_voxeldata,
+					proptex.TEXTURE_PT_clouds,
+					proptex.TEXTURE_PT_wood,
+					proptex.TEXTURE_PT_marble,
+					proptex.TEXTURE_PT_magic,
+					proptex.TEXTURE_PT_blend,
+					proptex.TEXTURE_PT_stucci,
+					proptex.TEXTURE_PT_distortednoise)
+	for entry in blTexturePanels:
+		entry.COMPAT_ENGINES.add('VRAY_RENDER')
+		entry.COMPAT_ENGINES.add('VRAY_RENDER_PREVIEW')
+	del proptex
+
 	from bl_ui import properties_texture
 	properties_texture.TEXTURE_PT_image.COMPAT_ENGINES.add('VRAY_RENDER')
 	properties_texture.TEXTURE_PT_image.COMPAT_ENGINES.add('VRAY_RENDER_PREVIEW')
@@ -392,6 +407,21 @@ def register():
 
 
 def unregister():
+	import bl_ui.properties_texture as proptex
+	blTexturePanels = (proptex.TEXTURE_PT_image,
+					proptex.TEXTURE_PT_voxeldata,
+					proptex.TEXTURE_PT_clouds,
+					proptex.TEXTURE_PT_wood,
+					proptex.TEXTURE_PT_marble,
+					proptex.TEXTURE_PT_magic,
+					proptex.TEXTURE_PT_blend,
+					proptex.TEXTURE_PT_stucci,
+					proptex.TEXTURE_PT_distortednoise)
+	for entry in blTexturePanels:
+		entry.COMPAT_ENGINES.remove('VRAY_RENDER')
+		entry.COMPAT_ENGINES.remove('VRAY_RENDER_PREVIEW')
+	del proptex
+
 	from bl_ui import properties_texture
 	try:
 		properties_texture.TEXTURE_PT_image.COMPAT_ENGINES.remove('VRAY_RENDER')
