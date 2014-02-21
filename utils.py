@@ -710,6 +710,12 @@ def get_uv_layers_map(sce):
 	return uv_layers
 
 
+def getTexByName(texName):
+	if texName in bpy.data.textures:
+		return get_name(bpy.data.textures[texName], prefix='TE')
+	return 'TENOTEXTUREIESSET'
+
+
 # Generate visibility list for "Hide From View"
 def get_visibility_lists(camera):
 	VRayCamera= camera.data.vray
