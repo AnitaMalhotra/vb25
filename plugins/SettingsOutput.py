@@ -185,7 +185,7 @@ def write(bus):
 	ofile.write("\n}\n")
 
 	ofile.write("\nSettingsEXR SettingsEXR {")
-	ofile.write("\n\tcompression=%i;" % SettingsOutput.exr_compression)
+	ofile.write("\n\tcompression=%s;" % SettingsOutput.exr_compression)
 	ofile.write("\n\tbits_per_channel=%s;" % SettingsOutput.color_depth)
 	ofile.write("\n}\n")
 
