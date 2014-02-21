@@ -125,9 +125,9 @@ def add_properties():
 	class VRayObject(bpy.types.PropertyGroup):
 		dupliGroupIDOverride = IntProperty(
 			name        = "Dupli Group ID Override",
-			description = "Override \"Object ID\" for the whole Dupli Group. 0 - means no override",
-			min         = 0,
-			default     = 0
+			description = "Override \"Object ID\" for the whole Dupli Group. -1 - means no override",
+			min         = -1,
+			default     = -1
 		)
 
 		overrideWithScene = BoolProperty(
