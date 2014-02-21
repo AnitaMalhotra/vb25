@@ -286,7 +286,7 @@ def write(bus):
 			else:
 				value= "List(%s)" % (",".join(ramp_col))
 		elif param == 'texture_map':
-			continue
+			value = getTexByName(TexGradRamp.texture_map)
 		else:
 			value= getattr(TexGradRamp, param)
 		ofile.write("\n\t%s= %s;"%(param, a(scene, value)))
