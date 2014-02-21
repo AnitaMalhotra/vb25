@@ -212,13 +212,13 @@ def write(bus):
 
     ptr = texture.vray.TexDistance
 
-    distance = "%s::out_intensity" % utils.get_name(ptr.distance_tex, prefix='TE') if ptr.distance_tex else ptr.distance
+    distance = "%s::out_intensity" % utils.getTexByName(ptr.distance_tex) if ptr.distance_tex else ptr.distance
 
-    far_tex  = utils.get_name(ptr.far_tex, prefix='TE')  if ptr.far_tex else ptr.far_tex_clr
-    near_tex = utils.get_name(ptr.near_tex, prefix='TE') if ptr.near_tex else ptr.near_tex_clr
+    far_tex  = utils.getTexByName(ptr.far_tex)  if ptr.far_tex else ptr.far_tex_clr
+    near_tex = utils.getTexByName(ptr.near_tex) if ptr.near_tex else ptr.near_tex_clr
 
-    inside_tex  = utils.get_name(ptr.inside_tex, prefix='TE')  if ptr.inside_tex else ptr.inside_tex_clr
-    outside_tex = utils.get_name(ptr.outside_tex, prefix='TE') if ptr.outside_tex else ptr.outside_tex_clr
+    inside_tex  = utils.getTexByName(ptr.inside_tex)  if ptr.inside_tex else ptr.inside_tex_clr
+    outside_tex = utils.getTexByName(ptr.outside_tex) if ptr.outside_tex else ptr.outside_tex_clr
 
     objects = ",".join([utils.get_name(ob, prefix='OB') for ob in utils.generate_object_list(ptr.objects, ptr.groups)])
 
