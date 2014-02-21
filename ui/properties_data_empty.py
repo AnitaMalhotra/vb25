@@ -49,8 +49,9 @@ class VRAY_DP_empty(VRayDataPanel, bpy.types.Panel):
         
         VRayObject = context.object.vray
 
-        box = layout.box()
+        layout.prop(VRayObject, 'dupliGroupIDOverride', text="Dupli ID Override")
 
+        box = layout.box()
         box.prop(VRayObject, 'overrideWithScene')
 
         if VRayObject.overrideWithScene:
