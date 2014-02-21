@@ -46,6 +46,21 @@ PARAMS= (
 
 def add_properties(rna_pointer):
 	class SettingsOutput(bpy.types.PropertyGroup):
+		exr_compression = EnumProperty(
+			name= "Compression",
+			description= "OpenEXR compression type",
+			items= (
+				('0', "Default", ""),
+				('1', "No Compression", ""),
+				('2', "RLE", ""),
+				('3', "ZIPS", ""),
+				('4', "ZIP", ""),
+				('5', "PIZ", ""),
+				('6', "PXR24", ""),
+			),
+			default='3'
+		)
+
 		img_format = EnumProperty(
 			name= "Type",
 			description= "Output image format",
@@ -170,7 +185,7 @@ def write(bus):
 	ofile.write("\n}\n")
 
 	ofile.write("\nSettingsEXR SettingsEXR {")
-	ofile.write("\n\tcompression= %i;" % COMPRESSION[scene.render.image_settings.exr_codec])
+	ofile.write("\n\tcompression=%i;" % SettingsOutput.exr_compression)
 	ofile.write("\n\tbits_per_channel=%s;" % SettingsOutput.color_depth)
 	ofile.write("\n}\n")
 
