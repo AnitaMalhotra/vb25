@@ -220,7 +220,14 @@ def write(bus):
     inside_tex  = utils.getTexByName(ptr.inside_tex)  if ptr.inside_tex else ptr.inside_tex_clr
     outside_tex = utils.getTexByName(ptr.outside_tex) if ptr.outside_tex else ptr.outside_tex_clr
 
-    objects = ",".join([utils.get_name(ob, prefix='OB') for ob in utils.generate_object_list(ptr.objects, ptr.groups)])
+    nodeNamesList = []
+    for ob in utils.generate_object_list(ptr.objects, ptr.groups):
+        # NOTE: If object is not exported texture will crash
+        if not utils.object_on_visible_layers(scene, ob):
+            return None
+        nodeNamesList.append(utils.get_name(ob, prefix='OB'))
+
+    objects = ",".join(nodeNamesList)
 
     ofile.write("\nTexDistance %s {" % texName)
     ofile.write("\n\tobjects=List(%s);" % objects)
