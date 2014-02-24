@@ -382,6 +382,7 @@ def GetRegClasses():
 def register():
 	import bl_ui.properties_texture as proptex
 	blTexturePanels = (proptex.TEXTURE_PT_image,
+					proptex.TEXTURE_PT_colors,
 					proptex.TEXTURE_PT_voxeldata,
 					proptex.TEXTURE_PT_clouds,
 					proptex.TEXTURE_PT_wood,
