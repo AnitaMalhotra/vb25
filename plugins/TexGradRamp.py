@@ -333,12 +333,9 @@ class VRAY_TP_TexGradRamp(ui.VRayTexturePanel, bpy.types.Panel):
 		if TexGradRamp.gradient_type == 'MAPPED':
 			layout.separator()
 			
-			split= layout.split()
-			row= split.row(align= True)
-			row.label(text="Source map:")
-			row.prop_search(TexGradRamp, 'texture_map',
-							bpy.data,    'textures',
-							text= "")
+			split = layout.split(percentage=0.33)
+			split.column().label(text="Source map:")
+			split.column().prop_search(TexGradRamp, 'texture_map', bpy.data, 'textures', text="")
 
 		layout.separator()
 
@@ -381,3 +378,12 @@ def register():
 def unregister():
 	for regClass in GetRegClasses():
 		bpy.utils.unregister_class(regClass)
+
+
+if __name__ == '__main__':
+    try:
+        unregister()
+    except:
+        pass
+    register()
+ 
