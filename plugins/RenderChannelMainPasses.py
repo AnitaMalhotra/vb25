@@ -57,7 +57,6 @@ PARAM_MAP= {
 	
 	'Background':          124,
 	'Alpha':               125,
-	'Color':               126,
 	'Wire Color':          127,
 	'Matte Shadow':        128,
 	'Total Lightning':     129,
