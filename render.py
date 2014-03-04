@@ -1791,6 +1791,11 @@ def run(bus):
 	resolution_x= int(scene.render.resolution_x * scene.render.resolution_percentage / 100)
 	resolution_y= int(scene.render.resolution_y * scene.render.resolution_percentage / 100)
 
+	if vray_standalone is None:
+		if bus['engine']:
+			bus['engine'].report({'ERROR'}, "V-Ray Standalone not found!")
+		return
+
 	params = []
 	params.append(vray_standalone)
 	params.append('-sceneFile=%s' % Quotes(bus['filenames']['scene']))
