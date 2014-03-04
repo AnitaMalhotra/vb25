@@ -804,6 +804,12 @@ def write_VolumeVRayToon_from_material(bus):
 	ob= bus['node']['object']
 	ma= bus['material']['material']
 
+	if not ob or not ma:
+		return None
+
+	if not ma.users:
+		return None
+
 	VRayMaterial= ma.vray
 
 	VolumeVRayToon= VRayMaterial.VolumeVRayToon
