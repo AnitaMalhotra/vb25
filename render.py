@@ -1055,14 +1055,6 @@ def write_scene(bus):
 					}
 					write_texture(bus)
 
-					bus['files']['materials'].write("\n// Texture preview material")
-					bus['files']['materials'].write("\nBRDFLight BRDFTexPreview {")
-					bus['files']['materials'].write("\n\tcolor=%s;" % get_name(previewTex, prefix='TE'))
-					bus['files']['materials'].write("\n\tcolorMultiplier=1.0;")
-					bus['files']['materials'].write("\n}\n")
-					bus['files']['materials'].write("\nMtlSingleBRDF %s {" % get_name(previewMa, prefix='MA'))
-					bus['files']['materials'].write("\n\tbrdf=BRDFTexPreview;")
-					bus['files']['materials'].write("\n}\n")
 			else:
 				# Material preview
 				def previewTextures():
