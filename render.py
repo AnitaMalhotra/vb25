@@ -770,10 +770,8 @@ def write_lamp(bus):
 			bus['lightlinker'][lamp_name]['exclude'] = generate_object_list(VRayLamp.exclude_objects, VRayLamp.exclude_groups)
 
 
-def writeSceneInclude(bus):
+def writeSceneInclude(bus, ob):
 	sceneFile = bus['files']['scene']
-
-	ob = bus['node']['object']
 
 	VRayObject = ob.vray
 
@@ -783,21 +781,19 @@ def writeSceneInclude(bus):
 
 		sceneFile.write("\nSceneInclude %s {" % get_name(ob, prefix='SI'))
 
-		vrsceneFilelist = []
+		# vrsceneFilelist = []
+		# if VRayObject.sceneFilepath:
+		# 	vrsceneFilelist.append(bpy.path.abspath(VRayObject.sceneFilepath))
+		# if VRayObject.sceneDirpath:
+		# 	vrsceneDirpath = bpy.path.abspath(VRayObject.sceneDirpath)
+		# 	for dirname, dirnames, filenames in os.walk(vrsceneDirpath):
+		# 		for filename in filenames:
+		# 			if not filename.endswith(".vrscene"):
+		# 				continue
+		# 			vrsceneFilelist.append(os.path.join(dirname, filename))
+		# sceneFile.write("\n\tfilepath=\"%s\";" % (";").join(vrsceneFilelist))
 
-		if VRayObject.sceneFilepath:
-			vrsceneFilelist.append(bpy.path.abspath(VRayObject.sceneFilepath))
-
-		if VRayObject.sceneDirpath:
-			vrsceneDirpath = bpy.path.abspath(VRayObject.sceneDirpath)
-
-			for dirname, dirnames, filenames in os.walk(vrsceneDirpath):
-				for filename in filenames:
-					if not filename.endswith(".vrscene"):
-						continue
-					vrsceneFilelist.append(os.path.join(dirname, filename))
-		
-		sceneFile.write("\n\tfilepath=\"%s\";" % (";").join(vrsceneFilelist))
+		sceneFile.write("\n\tfilepath=\"%s\";" % bpy.path.abspath(VRayObject.sceneFilepath))
 		sceneFile.write("\n\tprefix=\"%s\";" % get_name(ob, prefix='SI'))
 
 		sceneFile.write("\n\ttransform=%s;" % transform(ob.matrix_world))
@@ -1108,6 +1104,10 @@ def write_scene(bus):
 		for ob in bpy.context.scene.objects:
 			if bus['engine'].test_break():
 				break
+
+			if ob.type == 'EMPTY':
+				writeSceneInclude(bus, ob)
+				continue
 
 			if ob.type not in {'LAMP'} and not isMeshLight(ob):
 				continue
