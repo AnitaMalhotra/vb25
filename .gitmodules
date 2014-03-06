@@ -1,0 +1,3 @@
+[submodule "vray_tools"]
+	path = vray_tools
+	url = https://github.com/bdancer/vray_tools.git
