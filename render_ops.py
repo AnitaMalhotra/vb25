@@ -65,7 +65,12 @@ class VRAY_OT_update(bpy.types.Operator):
 	bl_description = "Update exporter from github"
 
 	def execute(self, context):
-		update_dir = create_dir(os.path.join(tempfile.gettempdir(), "vb25_update"))
+		# Check if target dir is writable
+		cur_vb25_dirpath = get_vray_exporter_path()
+
+		if not os.access(cur_vb25_dirpath, os.W_OK):
+			self.report({'ERROR'}, "Exporter directory is not writable!")
+			return {'CANCELLED'}
 
 		# Downloading file
 		self.report({'INFO'}, "Downloading 'master' branch archive...")
@@ -77,24 +82,25 @@ class VRAY_OT_update(bpy.types.Operator):
 		try:
 			(filename, headers) = urllib.request.urlretrieve(GIT_MASTER_URL)
 		except urllib.error.URLError:
-			self.report({'ERROR'}, "Error retrieving the files. Check your connection.")
+			self.report({'ERROR'}, "Error retrieving the files! Check your connection!")
 			return {'CANCELLED'}
 
 		# Extracting archive
-		ziparchive = zipfile.ZipFile(filename)
-		ziparchive.extractall(update_dir)
-		ziparchive.close()
+		update_dir = create_dir(os.path.join(tempfile.gettempdir(), "vb25_update"))
+		try:
+			ziparchive = zipfile.ZipFile(filename)
+			ziparchive.extractall(update_dir)
+			ziparchive.close()
+		except:
+			self.report({'ERROR'}, "Error unpacking the archive!")
+			return {'CANCELLED'}
 
-		# Check update dir
-		cur_vb25_dirpath = get_vray_exporter_path()
 		new_vb25_dirpath = ""
-
 		dirnames = os.listdir(update_dir)
 		for dirname in dirnames:
 			if dirname.startswith("bdancer-vb25-"):
 				new_vb25_dirpath = os.path.join(update_dir, dirname)
 				break
-
 		if not new_vb25_dirpath:
 			self.report({'ERROR'}, "Update files not found!")
 			return {'CANCELLED'}
@@ -111,7 +117,7 @@ class VRAY_OT_update(bpy.types.Operator):
 						os.system("del /Q /F %s" % s)
 			else:
 				shutil.rmtree(cur_vb25_dirpath)
-				
+
 		copytree(new_vb25_dirpath, cur_vb25_dirpath)
 
 		if os.path.exists(filename):
@@ -122,7 +128,7 @@ class VRAY_OT_update(bpy.types.Operator):
 			self.report({'INFO'}, "Removing update unpack directory: %s"%(update_dir))
 			shutil.rmtree(update_dir)
 
-		self.report({'INFO'}, "V-Ray/Blender exporter updated!")
+		self.report({'INFO'}, "V-Ray/Blender updated! Please, restart Blender!")
 
 		return {'FINISHED'}
 
