@@ -24,8 +24,8 @@
 
 # VRay base classes
 
-__all__ = [
-	'VRayProxy',
-	'VRaySceneParser',
-	'VrmatParser',
-]
+from vb25.lib.VRaySocket     import VRaySocket
+from vb25.lib.VRayProcess    import VRayProcess
+from vb25.lib.AttributeUtils import *
+
+from vb25.lib.UtilsBlender   import *

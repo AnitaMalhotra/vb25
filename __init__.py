@@ -45,6 +45,7 @@ if "bpy" in locals():
 	imp.reload(ui)
 	imp.reload(preset)
 	imp.reload(render_ops)
+	imp.reload(engine)
 	imp.reload(events)
 else:
 	import bpy
@@ -53,26 +54,25 @@ else:
 	from vb25 import ui
 	from vb25 import preset
 	from vb25 import render_ops
+	from vb25 import engine
 	from vb25 import events
 
 
 def register():
-	import os
-	import _vray_for_blender
-	from vb25 import utils
-	_vray_for_blender.start(os.path.join(utils.get_vray_exporter_path(), "plugins_desc"))
+	engine.Init()
 
 	ui.register()
 	preset.register()
 	events.register()
 	plugins.add_properties()
 	render_ops.register()
+	engine.register()
 
 
 def unregister():
-	import _vray_for_blender
-	_vray_for_blender.free()
+	engine.Shutdown()
 
+	engine.unregister()
 	render_ops.unregister()
 	plugins.remove_properties()
 	events.unregister()

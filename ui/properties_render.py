@@ -232,11 +232,13 @@ class VRAY_RP_render(VRayRenderPanel, bpy.types.Panel):
 		row.operator('render.render', text=render_label, icon=render_icon)
 		row.prop(rd, "use_lock_interface", text="")
 
-		layout.prop(VRayExporter, 'auto_meshes', text="Re-Export Meshes")
-
 		if VRayExporter.animation:
-			layout.prop(VRayExporter, 'animation_type')
-			layout.prop(VRayExporter, 'check_animated')
+			layout.separator()
+			layout.prop(VRayExporter, 'animation_type', text="Mode")
+			layout.prop(VRayExporter, 'check_animated', text="Check Update")
+			layout.separator()
+		else:
+			layout.prop(VRayExporter, 'auto_meshes', text="Re-Export Meshes")
 
 		split= layout.split()
 		col= split.column()

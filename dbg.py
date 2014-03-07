@@ -24,9 +24,11 @@
 
 '''
 
-import os
 import bpy
 import inspect
+import os
+import sys
+import traceback
 
 
 # https://gist.github.com/techtonik/2151727
@@ -61,3 +63,12 @@ def msg(msg="", skip=2):
     if bpy.app.debug:
         print("...", caller_name(skip))
         print("......", msg)
+
+
+def ExceptionInfo(e):
+    exc_type, exc_value, exc_traceback = sys.exc_info()
+
+    print("Exception => '%s': %s" % (type(e).__name__, e))
+    print("Traceback =>")
+
+    traceback.print_tb(exc_traceback)

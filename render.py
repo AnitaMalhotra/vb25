@@ -49,6 +49,7 @@ import _vray_for_blender
 
 import vb25
 from vb25.lib     import VRayProcess
+from vb25.lib     import UtilsBlender
 from vb25.utils   import *
 from vb25.plugins import *
 from vb25.texture import *
@@ -438,9 +439,9 @@ def	write_material(bus):
 
 	# Check Toon before cache
 	if VRayMaterial.VolumeVRayToon.use:
-		bus['effects']['toon']['effects'].append(
-			PLUGINS['SETTINGS']['SettingsEnvironment'].write_VolumeVRayToon_from_material(bus)
-		)
+		toonEffect = PLUGINS['SETTINGS']['SettingsEnvironment'].write_VolumeVRayToon_from_material(bus)
+		if toonEffect:
+			bus['effects']['toon']['effects'].append(toonEffect)
 		append_unique(bus['effects']['toon']['objects'], bus['node']['object'])
 
 	# Write material textures
@@ -809,28 +810,102 @@ def writeSceneInclude(bus, ob):
 		sceneFile.write("\n}\n")
 
 
-def write_scene(bus):
-	scene= bus['scene']
+def WritePreviewLights(bus):
+	bus['files']['lights'].write("\nLightDirectMax LALamp_008 { // PREVIEW")
+	bus['files']['lights'].write("\n\tintensity= 1.000000;")
+	bus['files']['lights'].write("\n\tcolor= Color(1.000000, 1.000000, 1.000000);")
+	bus['files']['lights'].write("\n\tshadows= 0;")
+	bus['files']['lights'].write("\n\tcutoffThreshold= 0.01;")
+	bus['files']['lights'].write("\n\taffectSpecular= 0;")
+	bus['files']['lights'].write("\n\tareaSpeculars= 0;")
+	bus['files']['lights'].write("\n\tfallsize= 100.0;")
+	bus['files']['lights'].write("\n\ttransform= Transform(")
+	bus['files']['lights'].write("\n\t\tMatrix(")
+	bus['files']['lights'].write("\n\t\t\tVector(1.000000, 0.000000, -0.000000),")
+	bus['files']['lights'].write("\n\t\t\tVector(0.000000, 0.000000, 1.000000),")
+	bus['files']['lights'].write("\n\t\t\tVector(0.000000, -1.000000, 0.000000)")
+	bus['files']['lights'].write("\n\t\t),")
+	bus['files']['lights'].write("\n\t\tVector(1.471056, -14.735638, 3.274598));")
+	bus['files']['lights'].write("\n}\n")
 
-	VRayScene=       scene.vray
+	bus['files']['lights'].write("\nLightSpot LALamp_002 { // PREVIEW")
+	bus['files']['lights'].write("\n\tintensity= 5.000000;")
+	bus['files']['lights'].write("\n\tcolor= Color(1.000000, 1.000000, 1.000000);")
+	bus['files']['lights'].write("\n\tconeAngle= 1.3;")
+	bus['files']['lights'].write("\n\tpenumbraAngle= -0.4;")
+	bus['files']['lights'].write("\n\tshadows= 1;")
+	bus['files']['lights'].write("\n\tcutoffThreshold= 0.01;")
+	bus['files']['lights'].write("\n\taffectDiffuse= 1;")
+	bus['files']['lights'].write("\n\taffectSpecular= 0;")
+	bus['files']['lights'].write("\n\tareaSpeculars= 0;")
+	bus['files']['lights'].write("\n\tshadowRadius= 0.000000;")
+	bus['files']['lights'].write("\n\tshadowSubdivs= 4;")
+	bus['files']['lights'].write("\n\tdecay= 1.0;")
+	bus['files']['lights'].write("\n\ttransform= Transform(")
+	bus['files']['lights'].write("\n\t\tMatrix(")
+	bus['files']['lights'].write("\n\t\t\tVector(-0.549843, 0.655945, 0.517116),")
+	bus['files']['lights'].write("\n\t\t\tVector(-0.733248, -0.082559, -0.674931),")
+	bus['files']['lights'].write("\n\t\t\tVector(-0.400025, -0.750280, 0.526365)")
+	bus['files']['lights'].write("\n\t\t),")
+	bus['files']['lights'].write("\n\t\tVector(-5.725639, -13.646054, 8.5));")
+	bus['files']['lights'].write("\n}\n")
 
-	VRayExporter=    VRayScene.exporter
-	SettingsOptions= VRayScene.SettingsOptions
+	bus['files']['lights'].write("\nLightOmni LALamp { // PREVIEW")
+	bus['files']['lights'].write("\n\tintensity= 50.000000;")
+	bus['files']['lights'].write("\n\tcolor= Color(1.000000, 1.000000, 1.000000);")
+	bus['files']['lights'].write("\n\tshadows= 0;")
+	bus['files']['lights'].write("\n\tcutoffThreshold= 0.01;")
+	bus['files']['lights'].write("\n\taffectDiffuse= 1;")
+	bus['files']['lights'].write("\n\taffectSpecular= 0;")
+	bus['files']['lights'].write("\n\tspecular_contribution= 0.000000;")
+	bus['files']['lights'].write("\n\tareaSpeculars= 0;")
+	bus['files']['lights'].write("\n\tshadowSubdivs= 4;")
+	bus['files']['lights'].write("\n\tdecay= 2.0;")
+	bus['files']['lights'].write("\n\ttransform= Transform(")
+	bus['files']['lights'].write("\n\t\tMatrix(")
+	bus['files']['lights'].write("\n\t\t\tVector(0.499935, 0.789660, 0.355671),")
+	bus['files']['lights'].write("\n\t\t\tVector(-0.672205, 0.094855, 0.734263),")
+	bus['files']['lights'].write("\n\t\t\tVector(0.546081, -0.606168, 0.578235)")
+	bus['files']['lights'].write("\n\t\t),")
+	bus['files']['lights'].write("\n\t\tVector(15.685226, -7.460007, 3.0));")
+	bus['files']['lights'].write("\n}\n")
 
-	# Some failsafe defaults
-	bus['defaults']= {}
-	bus['defaults']['brdf']=     "BRDFNOBRDFISSET"
-	bus['defaults']['material']= "MANOMATERIALISSET"
-	bus['defaults']['texture']=  "TENOTEXTUREIESSET"
-	bus['defaults']['uvwgen']=   "DEFAULTUVWC"
-	bus['defaults']['blend']=    "TEDefaultBlend"
+	bus['files']['lights'].write("\nLightOmni LALamp_001 { // PREVIEW")
+	bus['files']['lights'].write("\n\tintensity= 20.000000;")
+	bus['files']['lights'].write("\n\tcolor= Color(1.000000, 1.000000, 1.000000);")
+	bus['files']['lights'].write("\n\tshadows= 0;")
+	bus['files']['lights'].write("\n\tcutoffThreshold= 0.01;")
+	bus['files']['lights'].write("\n\taffectDiffuse= 1;")
+	bus['files']['lights'].write("\n\taffectSpecular= 0;")
+	bus['files']['lights'].write("\n\tareaSpeculars= 0;")
+	bus['files']['lights'].write("\n\tshadowSubdivs= 4;")
+	bus['files']['lights'].write("\n\tdecay= 2.0;")
+	bus['files']['lights'].write("\n\ttransform= Transform(")
+	bus['files']['lights'].write("\n\t\tMatrix(")
+	bus['files']['lights'].write("\n\t\t\tVector(0.499935, 0.789660, 0.355671),")
+	bus['files']['lights'].write("\n\t\t\tVector(-0.672205, 0.094855, 0.734263),")
+	bus['files']['lights'].write("\n\t\t\tVector(0.546081, -0.606168, 0.578235)")
+	bus['files']['lights'].write("\n\t\t),")
+	bus['files']['lights'].write("\n\t\tVector(-10.500286, -12.464991, 4.0));")
+	bus['files']['lights'].write("\n}\n")
 
+
+def WriteHeaders(bus):
 	for key in bus['files']:
 		if bus['files'][key] is None:
 			continue
 		bus['files'][key].write("// V-Ray For Blender")
 		bus['files'][key].write("\n// %s" % datetime.datetime.now().strftime("%A, %d %B %Y %H:%M"))
 		bus['files'][key].write("\n// Filename: %s\n" % os.path.basename(bpy.data.filepath))
+
+
+def WriteDefaults(bus):
+	bus['defaults'] = {}
+	bus['defaults']['brdf']     = "BRDFNOBRDFISSET"
+	bus['defaults']['material'] = "MANOMATERIALISSET"
+	bus['defaults']['texture']  = "TENOTEXTUREIESSET"
+	bus['defaults']['uvwgen']   = "DEFAULTUVWC"
+	bus['defaults']['blend']    = "TEDefaultBlend"
 
 	bus['files']['scene'].write("\n// Settings\n")
 	bus['files']['nodes'].write("\n// Nodes\n")
@@ -861,393 +936,306 @@ def write_scene(bus):
 	bus['files']['materials'].write("\n\tbrdf= %s;" % bus['defaults']['brdf'])
 	bus['files']['materials'].write("\n}\n")
 
+
+def WriteFrame(bus, firstFrame=True, checkAnimated='NONE'):
 	if bus['preview']:
-		bus['files']['lights'].write("\nLightDirectMax LALamp_008 { // PREVIEW")
-		bus['files']['lights'].write("\n\tintensity= 1.000000;")
-		bus['files']['lights'].write("\n\tcolor= Color(1.000000, 1.000000, 1.000000);")
-		bus['files']['lights'].write("\n\tshadows= 0;")
-		bus['files']['lights'].write("\n\tcutoffThreshold= 0.01;")
-		bus['files']['lights'].write("\n\taffectSpecular= 0;")
-		bus['files']['lights'].write("\n\tareaSpeculars= 0;")
-		bus['files']['lights'].write("\n\tfallsize= 100.0;")
-		bus['files']['lights'].write("\n\ttransform= Transform(")
-		bus['files']['lights'].write("\n\t\tMatrix(")
-		bus['files']['lights'].write("\n\t\t\tVector(1.000000, 0.000000, -0.000000),")
-		bus['files']['lights'].write("\n\t\t\tVector(0.000000, 0.000000, 1.000000),")
-		bus['files']['lights'].write("\n\t\t\tVector(0.000000, -1.000000, 0.000000)")
-		bus['files']['lights'].write("\n\t\t),")
-		bus['files']['lights'].write("\n\t\tVector(1.471056, -14.735638, 3.274598));")
-		bus['files']['lights'].write("\n}\n")
+		WritePreviewLights(bus)
 
-		bus['files']['lights'].write("\nLightSpot LALamp_002 { // PREVIEW")
-		bus['files']['lights'].write("\n\tintensity= 5.000000;")
-		bus['files']['lights'].write("\n\tcolor= Color(1.000000, 1.000000, 1.000000);")
-		bus['files']['lights'].write("\n\tconeAngle= 1.3;")
-		bus['files']['lights'].write("\n\tpenumbraAngle= -0.4;")
-		bus['files']['lights'].write("\n\tshadows= 1;")
-		bus['files']['lights'].write("\n\tcutoffThreshold= 0.01;")
-		bus['files']['lights'].write("\n\taffectDiffuse= 1;")
-		bus['files']['lights'].write("\n\taffectSpecular= 0;")
-		bus['files']['lights'].write("\n\tareaSpeculars= 0;")
-		bus['files']['lights'].write("\n\tshadowRadius= 0.000000;")
-		bus['files']['lights'].write("\n\tshadowSubdivs= 4;")
-		bus['files']['lights'].write("\n\tdecay= 1.0;")
-		bus['files']['lights'].write("\n\ttransform= Transform(")
-		bus['files']['lights'].write("\n\t\tMatrix(")
-		bus['files']['lights'].write("\n\t\t\tVector(-0.549843, 0.655945, 0.517116),")
-		bus['files']['lights'].write("\n\t\t\tVector(-0.733248, -0.082559, -0.674931),")
-		bus['files']['lights'].write("\n\t\t\tVector(-0.400025, -0.750280, 0.526365)")
-		bus['files']['lights'].write("\n\t\t),")
-		bus['files']['lights'].write("\n\t\tVector(-5.725639, -13.646054, 8.5));")
-		bus['files']['lights'].write("\n}\n")
+	def isMeshLight(ob):
+		if ob.type in GEOM_TYPES and ob.vray.LightMesh.use:
+			return True
+		return False
 
-		bus['files']['lights'].write("\nLightOmni LALamp { // PREVIEW")
-		bus['files']['lights'].write("\n\tintensity= 50.000000;")
-		bus['files']['lights'].write("\n\tcolor= Color(1.000000, 1.000000, 1.000000);")
-		bus['files']['lights'].write("\n\tshadows= 0;")
-		bus['files']['lights'].write("\n\tcutoffThreshold= 0.01;")
-		bus['files']['lights'].write("\n\taffectDiffuse= 1;")
-		bus['files']['lights'].write("\n\taffectSpecular= 0;")
-		bus['files']['lights'].write("\n\tspecular_contribution= 0.000000;")
-		bus['files']['lights'].write("\n\tareaSpeculars= 0;")
-		bus['files']['lights'].write("\n\tshadowSubdivs= 4;")
-		bus['files']['lights'].write("\n\tdecay= 2.0;")
-		bus['files']['lights'].write("\n\ttransform= Transform(")
-		bus['files']['lights'].write("\n\t\tMatrix(")
-		bus['files']['lights'].write("\n\t\t\tVector(0.499935, 0.789660, 0.355671),")
-		bus['files']['lights'].write("\n\t\t\tVector(-0.672205, 0.094855, 0.734263),")
-		bus['files']['lights'].write("\n\t\t\tVector(0.546081, -0.606168, 0.578235)")
-		bus['files']['lights'].write("\n\t\t),")
-		bus['files']['lights'].write("\n\t\tVector(15.685226, -7.460007, 3.0));")
-		bus['files']['lights'].write("\n}\n")
-
-		bus['files']['lights'].write("\nLightOmni LALamp_001 { // PREVIEW")
-		bus['files']['lights'].write("\n\tintensity= 20.000000;")
-		bus['files']['lights'].write("\n\tcolor= Color(1.000000, 1.000000, 1.000000);")
-		bus['files']['lights'].write("\n\tshadows= 0;")
-		bus['files']['lights'].write("\n\tcutoffThreshold= 0.01;")
-		bus['files']['lights'].write("\n\taffectDiffuse= 1;")
-		bus['files']['lights'].write("\n\taffectSpecular= 0;")
-		bus['files']['lights'].write("\n\tareaSpeculars= 0;")
-		bus['files']['lights'].write("\n\tshadowSubdivs= 4;")
-		bus['files']['lights'].write("\n\tdecay= 2.0;")
-		bus['files']['lights'].write("\n\ttransform= Transform(")
-		bus['files']['lights'].write("\n\t\tMatrix(")
-		bus['files']['lights'].write("\n\t\t\tVector(0.499935, 0.789660, 0.355671),")
-		bus['files']['lights'].write("\n\t\t\tVector(-0.672205, 0.094855, 0.734263),")
-		bus['files']['lights'].write("\n\t\t\tVector(0.546081, -0.606168, 0.578235)")
-		bus['files']['lights'].write("\n\t\t),")
-		bus['files']['lights'].write("\n\t\tVector(-10.500286, -12.464991, 4.0));")
-		bus['files']['lights'].write("\n}\n")
-
-	# Processed objects
-	bus['objects']= []
-
-	# Effects from material / object settings
-	bus['effects']= {}
-	bus['effects']['fog']= {}
-
-	bus['effects']['toon']= {}
-	bus['effects']['toon']['effects']= []
-	bus['effects']['toon']['objects']= []
-
-	# Prepare exclude for effects
-	#
-	exclude_list = []
-	VRayEffects  = VRayScene.VRayEffects
-	if VRayEffects.use:
-		for effect in VRayEffects.effects:
-			if effect.use:
-				if effect.type == 'FOG':
-					EnvironmentFog = effect.EnvironmentFog
-					fog_objects = generate_object_list(EnvironmentFog.objects, EnvironmentFog.groups)
-					for ob in fog_objects:
-						if ob not in exclude_list:
-							exclude_list.append(ob.as_pointer())
-
-	def write_frame(bus, firstFrame=True, checkAnimated='NONE'):
-		def isMeshLight(ob):
-			if ob.type in GEOM_TYPES and ob.vray.LightMesh.use:
-				return True
-			return False
-
-		def isAnimated(o):
-			if firstFrame:
-				return True
-			if checkAnimated in {'NONE'}:
-				return True
-			if o.animation_data and o.animation_data.action:
-				return True
-			elif hasattr(o, 'parent') and o.parent:
-				return isAnimated(o.parent)
-			return False
-
-		scene = bus['scene']
-
-		VRayScene       = scene.vray
-		SettingsOptions = VRayScene.SettingsOptions
-
-		# Cache stores already exported data
-		bus['cache'] = {}
-		bus['cache']['textures']  = []
-		bus['cache']['materials'] = []
-		bus['cache']['displace']  = []
-		bus['cache']['proxy']     = []
-		bus['cache']['bitmap']    = []
-		bus['cache']['uvwgen']    = {}
-
-		# Camera
-		bus['camera']= scene.camera
-
-		# Fake node; get rid of this...
-		bus['node'] = {}
-
-		# Write objects and geometry
-		_vray_for_blender.setSkipObjects(bus['exporter'], exclude_list)
-		_vray_for_blender.exportScene(bus['exporter'])
-		_vray_for_blender.clearCache()
-
-		timerStart = time.clock()
-
-		# Write textures
-		def writeTextures(textures):
-			for tex in textures:
-				if bus['engine'].test_break():
-					break
-				bus['mtex'] = {
-					'name'    : clean_string(get_name(tex, prefix='TE')),
-					'texture' : tex,
-				}
-				if not isAnimated(tex):
-					# Material export will take tex from bus['cache']['textures']
-					append_unique(bus['cache']['textures'], bus['mtex']['name'])
-					continue
-				write_texture(bus)
-
-		if not bus['preview']:
-			writeTextures(bpy.data.textures)
-		else:
-			texPreviewOb = scene.objects.get('texture', None)
-			if texPreviewOb and texPreviewOb.is_visible(scene):
-				# Texture preview
-				def getPreviewTexture(ob):
-					if not len(ob.material_slots):
-						return None,None
-					if not ob.material_slots[0].material:
-						return None,None
-					ma = ob.material_slots[0].material
-					if not len(ma.texture_slots):
-						return None,None
-					slot = ma.texture_slots[0]
-					if not slot.texture:
-						return None,None
-					return ma, slot.texture
-
-				previewMa, previewTex = getPreviewTexture(texPreviewOb)
-				if previewTex:
-					bus['mtex'] = {
-						'name'    : clean_string(get_name(previewTex, prefix='TE')),
-						'texture' : previewTex,
-					}
-					write_texture(bus)
-
-			else:
-				# Material preview
-				def previewTextures():
-					for ob in scene.objects:
-						if len(ob.material_slots):
-							for ms in ob.material_slots:
-								if ms.material:
-									for ts in ms.material.texture_slots:
-										if ts and ts.texture:
-											yield ts.texture
-				writeTextures(previewTextures())
-
-		# Write materials
-		#
-		materials = bpy.data.materials
-		if bus['preview']:
-			def previewMaterials():
-				for ob in scene.objects:
-					if len(ob.material_slots):
-						for ms in ob.material_slots:
-							if ms.material:
-								yield ms.material
-			materials = previewMaterials()
-
-		bus['node']['object'] = None
-		for ma in materials:
-			if bus['engine'].test_break():
-				break
-			if not isAnimated(ma):
-				continue
-
-			bus['material'] = {}
-			bus['material']['material'] = ma
-
-			if SettingsOptions.mtl_override_on and SettingsOptions.mtl_override:
-				if not ma.vray.dontOverride:
-					bus['material']['material'] = get_data_by_name(scene, 'materials', SettingsOptions.mtl_override)
-
-			# Normal mapping settings pointer
-			bus['material']['normal_slot'] = None
-
-			# Bump mapping settings pointer
-			bus['material']['bump_slot']   = None
-
-			# Set if any texture uses object mapping
-			bus['material']['orco_suffix'] = ""
-
-			write_material(bus)
-
-		# Write lights
-		for ob in bpy.context.scene.objects:
-			if bus['engine'].test_break():
-				break
-
-			if ob.type == 'EMPTY':
-				writeSceneInclude(bus, ob)
-				continue
-
-			if ob.type not in {'LAMP'} and not isMeshLight(ob):
-				continue
-
-			if not object_on_visible_layers(scene, ob) or ob.hide_render:
-				if not scene.vray.SettingsOptions.light_doHiddenLights:
-					continue
-
-			if not (isAnimated(ob) or isAnimated(ob.data)):
-				continue
-
-			if isMeshLight(ob):
-				PLUGINS['GEOMETRY']['LightMesh'].write(bus, ob)
-			else:
-				bus['node'].update({
-					'object'   : ob, # Currently processes object
-					'visible'  : ob, # Object visibility
-					'base'     : ob, # Attributes for particle / dupli export
-					'dupli'    : {},
-					'particle' : {},
-				})
-				write_lamp(bus)
-
-		# TODO: Mesh lights
-
-		# Write settings
+	def isAnimated(o):
 		if firstFrame:
-			write_settings(bus)
+			return True
+		if checkAnimated in {'NONE'}:
+			return True
+		if o.animation_data and o.animation_data.action:
+			return True
+		elif hasattr(o, 'parent') and o.parent:
+			return isAnimated(o.parent)
+		return False
 
-		# TODO: Add camera animation detection
-		#
+	def writeTextures(bus, textures):
+		for tex in textures:
+			if bus['engine'].test_break():
+				break
+			bus['mtex'] = {
+				'name'    : clean_string(get_name(tex, prefix='TE')),
+				'texture' : tex,
+			}
+			if not isAnimated(tex):
+				# Material export will take tex from bus['cache']['textures']
+				append_unique(bus['cache']['textures'], bus['mtex']['name'])
+				continue
+			write_texture(bus)
+
+	scene = bus['scene']
+
+	VRayScene       = scene.vray
+	VRayExporter    = VRayScene.exporter
+	SettingsOptions = VRayScene.SettingsOptions
+
+	# Cache stores already exported data
+	# for the current frame
+	#
+	bus['cache'] = {
+		'textures'  : [],
+		'materials' : [],
+		'displace'  : [],
+		'proxy'     : [],
+		'bitmap'    : [],
+		'uvwgen'    : {},
+	}
+
+	# Camera
+	if not VRayExporter.camera_loop:
+		bus['camera'] = scene.camera
+
+	# Fake node; get rid of this...
+	bus['node'] = {}
+
+	# Write objects and geometry
+	#
+	exportNodes = True
+
+	exportGeometry = VRayExporter.auto_meshes
+	if VRayExporter.animation:
+		exportGeometry = True if firstFrame else VRayExporter.animation_type not in {'NOTMESHES', 'CAMERA'}
+
+	_vray_for_blender.setSkipObjects(bus['exporter'], UtilsBlender.GetObjectExcludeList(bus['scene']))
+	_vray_for_blender.exportScene(bus['exporter'], exportNodes, exportGeometry)
+	_vray_for_blender.clearCache()
+
+	timerStart = time.clock()
+
+	# Write textures
+	#
+	if not bus['preview']:
+		writeTextures(bus, bpy.data.textures)
+	else:
+		texPreviewOb = UtilsBlender.IsTexturePreview(scene)
+		if texPreviewOb:
+			# Texture preview
+			previewTex = UtilsBlender.GetPreviewTexture(texPreviewOb)
+			if previewTex:
+				bus['mtex'] = {
+					'name'    : clean_string(get_name(previewTex, prefix='TE')),
+					'texture' : previewTex,
+				}
+				write_texture(bus)
+		else:
+			# Material preview
+			writeTextures(bus, UtilsBlender.ObjectTexturesIt(scene.objects))
+
+	# Write materials
+	#
+	materials = bpy.data.materials
+	if bus['preview']:
+		materials = UtilsBlender.ObjectMaterialsIt(scene.objects)
+
+	bus['node']['object'] = None
+	for ma in materials:
+		if bus['engine'].test_break():
+			break
+		if not isAnimated(ma):
+			continue
+
+		bus['material'] = {}
+		bus['material']['material'] = ma
+
+		if SettingsOptions.mtl_override_on and SettingsOptions.mtl_override:
+			if not ma.vray.dontOverride:
+				bus['material']['material'] = get_data_by_name(scene, 'materials', SettingsOptions.mtl_override)
+
+		bus['material']['normal_slot'] = None # Normal mapping settings pointer
+		bus['material']['bump_slot']   = None # Bump mapping settings pointer
+		bus['material']['orco_suffix'] = ""   # Set if any texture uses object mapping
+
+		write_material(bus)
+
+	# Write lights
+	for ob in bpy.context.scene.objects:
+		if bus['engine'].test_break():
+			break
+
+		if ob.type == 'EMPTY':
+			writeSceneInclude(bus, ob)
+			continue
+
+		if ob.type not in {'LAMP'} and not isMeshLight(ob):
+			continue
+
+		if not object_on_visible_layers(scene, ob) or ob.hide_render:
+			if not scene.vray.SettingsOptions.light_doHiddenLights:
+				continue
+
+		if not (isAnimated(ob) or isAnimated(ob.data)):
+			continue
+
+		if isMeshLight(ob):
+			PLUGINS['GEOMETRY']['LightMesh'].write(bus, ob)
+		else:
+			bus['node'].update({
+				'object'   : ob, # Currently processes object
+				'visible'  : ob, # Object visibility
+				'base'     : ob, # Attributes for particle / dupli export
+				'dupli'    : {},
+				'particle' : {},
+			})
+			write_lamp(bus)
+
+	# Write settings
+	if firstFrame:
+		write_settings(bus)
+
+	PLUGINS['CAMERA']['CameraPhysical'].write(bus)
+	PLUGINS['SETTINGS']['BakeView'].write(bus)
+	PLUGINS['SETTINGS']['RenderView'].write(bus)
+	PLUGINS['CAMERA']['CameraStereoscopic'].write(bus)
+
+	# SphereFade could be animated
+	# We already export SphereFade data in settings export,
+	# so skip first frame
+	if not firstFrame:
+		PLUGINS['SETTINGS']['SettingsEnvironment'].WriteSphereFade(bus)
+
+	debug(scene, "Writing lights, materials and settings in %.2f" % (time.clock() - timerStart))
+
+
+def ExportPreview(bus):
+	scene = bus['scene']
+
+	res = WriteFrame(bus)
+
+	_vray_for_blender.exit(bus['exporter'])
+	del bus['exporter']
+
+	return res
+
+
+def ExportFullCamera(bus):
+	scene = bus['scene']
+
+	# Store current frame
+	selected_frame = scene.frame_current
+
+	# Write full first frame
+	scene.frame_set(scene.frame_start)
+	WriteFrame(bus, firstFrame=True, checkAnimated=False)
+
+	# Write rest camera motion
+	f = scene.frame_start+scene.frame_step
+	while(f <= scene.frame_end):
+		if bus['engine'].test_break():
+			return
+		scene.frame_set(f)
+
 		PLUGINS['CAMERA']['CameraPhysical'].write(bus)
-		PLUGINS['SETTINGS']['BakeView'].write(bus)
 		PLUGINS['SETTINGS']['RenderView'].write(bus)
 		PLUGINS['CAMERA']['CameraStereoscopic'].write(bus)
 
-		# SphereFade could be animated
-		# We already export SphereFade data in settings export,
-		# so skip first frame
-		if not firstFrame:
-			PLUGINS['SETTINGS']['SettingsEnvironment'].WriteSphereFade(bus)
+		f += scene.frame_step
 
-		debug(scene, "Writing lights, materials and settings in %.2f" % (time.clock() - timerStart))
+	# Restore selected frame
+	scene.frame_set(selected_frame)
+
+
+def ExportFullRange(bus):
+	scene = bus['scene']
+
+	VRayScene    = scene.vray
+	VRayExporter = VRayScene.exporter
+
+	# Store current frame
+	selected_frame = scene.frame_current
+
+	f = scene.frame_start
+	while(f <= scene.frame_end):
+		if bus['engine'].test_break():
+			return
+		scene.frame_set(f)
+
+		WriteFrame(bus, firstFrame=(f==scene.frame_start), checkAnimated=VRayExporter.check_animated)
+
+		f += scene.frame_step
+
+		# Clear names cache
+		_vray_for_blender.clearCache()
+
+	# Restore selected frame
+	scene.frame_set(selected_frame)
+
+	# Clear frames cache
+	_vray_for_blender.clearFrames()
+
+
+def write_scene(bus):
+	scene= bus['scene']
+
+	VRayScene=       scene.vray
+
+	VRayExporter=    VRayScene.exporter
+	SettingsOptions= VRayScene.SettingsOptions
+
+	bus.update({
+		'objects' : [],
+		'effects': {
+			'fog'  : {},
+			'toon' : {
+				'effects' : [],
+				'objects' : [],
+			},
+		}
+	})
+
+	bus['exporter'] = _vray_for_blender.init(
+		engine  = bus['engine'].as_pointer(),
+		context = bpy.context.as_pointer(),
+
+		objectFile   = bus['files']['nodes'],
+		geometryFile = bus['files']['geometry'],
+		lightsFile   = bus['files']['lights'],
+
+		scene = scene.as_pointer(),
+	)
+
+	if bus['preview']:
+		return ExportPreview(bus)
 
 	timer= time.clock()
 
 	debug(scene, "Writing scene...")
 
-	CHECK_ANIMATED = {
-		'NONE'   : 0,
-		'SIMPLE' : 1,
-		'HASH'   : 2,
-		'BOTH'   : 3,
-	}
+	isAnimation   = VRayExporter.animation and VRayExporter.animation_type in {'FULL', 'NOTMESHES'}
+	checkAnimated = CHECK_ANIMATED[VRayExporter.check_animated]
 
-	if bus['preview']:
-		bus['exporter'] = _vray_for_blender.init(
-			context = bpy.context.as_pointer(),
-			engine  = bus['engine'].as_pointer(),
-			scene   = scene.as_pointer(),
+	_vray_for_blender.initCache(isAnimation, checkAnimated)
 
-			exportNodes    = True,
-			exportGeometry = True,
-
-			isAnimation   = False,
-			checkAnimated = 0,
-
-			objectFile   = bus['files']['nodes'],
-			geometryFile = bus['files']['geometry'],
-			lightsFile   = bus['files']['lights'],
-		)
-
-		write_frame(bus)
-
-		_vray_for_blender.exit(bus['exporter'])
-
-		del bus['exporter']
-
-		return False
-
-	bus['exporter'] = _vray_for_blender.init(
-		context = bpy.context.as_pointer(),
-		engine  = bus['engine'].as_pointer(),
-
-		exportNodes    = True,
-		exportGeometry = VRayExporter.auto_meshes,
-
-		isAnimation   = VRayExporter.animation and VRayExporter.animation_type == 'FULL',
-		checkAnimated = CHECK_ANIMATED[VRayExporter.check_animated],
-
-		objectFile   = bus['files']['nodes'],
-		geometryFile = bus['files']['geometry'],
-		lightsFile   = bus['files']['lights'],
-	)
-
-	_vray_for_blender.initCache(VRayExporter.animation, CHECK_ANIMATED[VRayExporter.check_animated])
-
-	if VRayExporter.animation and VRayExporter.animation_type in {'FULL', 'NOTMESHES'}:
-		# Store current frame
-		selected_frame = scene.frame_current
-
-		f = scene.frame_start
-		while(f <= scene.frame_end):
-			if bus['engine'] and bus['engine'].test_break():
-				return
-			scene.frame_set(f)
-			bus['check_animated'] = VRayExporter.check_animated
-			write_frame(bus, firstFrame=(f==scene.frame_start), checkAnimated=VRayExporter.check_animated)
-			f += scene.frame_step
-
-			_vray_for_blender.clearCache()
-
-		# Restore selected frame
-		scene.frame_set(selected_frame)
-
-		_vray_for_blender.clearFrames()
+	if VRayExporter.animation:
+		if VRayExporter.animation_type in {'FULL', 'NOTMESHES'}:
+			ExportFullRange(bus)
+		elif VRayExporter.animation_type in {'CAMERA'}:
+			ExportFullCamera(bus)
 	else:
 		if VRayExporter.camera_loop:
-			if bus['cameras']:
-				for i,camera in enumerate(bus['cameras']):
-					bus['camera'] = camera
-					bus['camera_index'] = i
-					VRayExporter.customFrame = i+1
-					write_frame(bus)
-			else:
-				debug(scene, "No cameras selected for \"Camera loop\"!", error= True)
-				return True # Error
-
+			if not bus['cameras']:
+				bus['engine'].report({'ERROR'}, "No cameras selected for \"Camera Loop\"!")
+				return 1
+			for i,camera in enumerate(bus['cameras']):
+				bus['camera'] = camera
+				VRayExporter.customFrame = i+1
+				WriteFrame(bus)
 		else:
-			write_frame(bus)
+			WriteFrame(bus)
 
 	_vray_for_blender.exit(bus['exporter'])
 	del bus['exporter']
 
 	debug(scene, "Writing scene... done {0:<64}".format("[%.2f]"%(time.clock() - timer)))
 
-	if bus['engine'].test_break():
-		return True
-
-	return False # No errors
+	return 0
 
 
 def run(bus):
@@ -1531,72 +1519,58 @@ def run(bus):
 				time.sleep(0.1)
 
 
-def close_files(bus):
+def export_and_run(bus):
+	err = False
+
+	try:
+		WriteHeaders(bus)
+		WriteDefaults(bus)
+		err = write_scene(bus)
+	except Exception as e:
+		err = True
+		dbg.ExceptionInfo(e)
+		bus['engine'].report({'ERROR'}, "Export error! Check system console!")
+
 	for key in bus['files']:
 		if bus['files'][key] is None:
 			continue
 		bus['files'][key].write("\n")
 		bus['files'][key].close()
 
+	if err:
+		bus['engine'].report({'ERROR'}, "Export error!")
+		return
 
-def export_and_run(bus):
-	err = write_scene(bus)
-
-	close_files(bus)
-
-	if not err:
-		run(bus)
+	run(bus)
 
 
-def init_bus(engine, scene, preview = False):
-	VRayScene=    scene.vray
-	VRayExporter= VRayScene.exporter
+def init_bus(engine, scene, isPreview=False):
+	VRayScene    = scene.vray
+	VRayExporter = VRayScene.exporter
 
-	# Settings bus
-	bus= {}
+	bus = {
+		'engine'      : engine,
+		'filenames'   : {},
+		'files'       : {},
+		'lightlinker' : {},
+		'cameras'     : [],
+		'plugins'     : PLUGINS,
+		'preview'     : isPreview,
+		'scene'       : scene,
+	}
 
-	# Plugins
-	bus['plugins']= PLUGINS
-
-	# Scene
-	bus['scene']=   scene
-
-	# Preview
-	bus['preview']= preview
-
-	# V-Ray uses UV indexes, Blender uses UV names
-	# Here we store UV name->index map
-	bus['uvs']= get_uv_layers_map(scene)
-
-	# Output files
-	bus['files']=     {}
-	bus['filenames']= {}
-
-	bus['lightlinker'] = {}
-
-	bus['check_animated'] = VRayExporter.check_animated
-	bus['anim'] = set()
+	if not isPreview:
+		if VRayExporter.camera_loop:
+			bus['cameras'] = [ob for ob in scene.objects if ob.type == 'CAMERA' and ob.data.vray.use_camera_loop]
 
 	init_files(bus)
-
-	# Camera loop
-	bus['cameras'] = []
-	if VRayExporter.camera_loop:
-		bus['cameras'] = [ob for ob in scene.objects if ob.type == 'CAMERA' and ob.data.vray.use_camera_loop]
-
-	# Render engine
-	bus['engine']= engine
 
 	return bus
 
 
-def render(engine, scene, preview= None):
+def render(engine, scene):
 	VRayScene    = scene.vray
 	VRayExporter = VRayScene.exporter
-
-	if preview:
-		export_and_run(init_bus(engine, scene, True))
-		return None
 
 	if VRayExporter.use_still_motion_blur:
 		# Store current settings
@@ -1607,13 +1581,17 @@ def render(engine, scene, preview= None):
 
 		# Run export
 		if e_anim_state:
-			if e_anim_type not in ['FRAMEBYFRAME']:
-				return "\"Still Motion Blur\" feature works only in \"Frame-By-Frame\" animation mode!"
+			if e_anim_type not in {'FRAMEBYFRAME'}:
+				engine.report({'ERROR'}, "\"Still Motion Blur\" feature works only in \"Frame By Frame\" animation mode!")
+				return
 
 			VRayExporter.animation_type = 'FULL'
 
 			f = frame_start
 			while(f <= frame_end):
+				if engine.test_break():
+					return
+
 				scene.frame_start = f - 1
 				scene.frame_end   = f
 
@@ -1635,24 +1613,23 @@ def render(engine, scene, preview= None):
 		VRayExporter.animation_type = e_anim_type
 		scene.frame_start = frame_start
 		scene.frame_end   = frame_end
-
 	else:
 		if VRayExporter.animation:
 			if VRayExporter.animation_type == 'FRAMEBYFRAME':
 				selected_frame = scene.frame_current
-
 				f = scene.frame_start
 				while(f <= scene.frame_end):
-					if engine and engine.test_break():
+					if engine.test_break():
 						return
 					scene.frame_set(f)
 					export_and_run(init_bus(engine, scene))
 					f += scene.frame_step
-
 				scene.frame_set(selected_frame)
 			else:
 				export_and_run(init_bus(engine, scene))
 		else:
 			export_and_run(init_bus(engine, scene))
 
-	return None
+
+def render_preview(engine, scene):
+	export_and_run(init_bus(engine, scene, isPreview=True))

@@ -64,6 +64,13 @@ PURE_PROCEDURAL= (
 	'TexFalloff',
 )
 
+CHECK_ANIMATED = {
+	'NONE'   : 0,
+	'SIMPLE' : 1,
+	'HASH'   : 2,
+	'BOTH'   : 3,
+}
+
 COLOR_TABLE= {
 	'22500': (0.3764,0.5432,1.0000),
 	'34800': (0.3361,0.5095,1.0000),

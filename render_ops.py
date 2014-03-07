@@ -1107,56 +1107,6 @@ class VRAY_OT_copy_linked_materials(bpy.types.Operator):
 		return {'CANCELLED'}
 
 
-
-'''
-  RENDER ENGINE
-'''
-class VRayRenderer(bpy.types.RenderEngine):
-	bl_idname      = 'VRAY_RENDER'
-	bl_label       = "%s" % VRAYBLENDER_MENU_ITEM
-	bl_use_preview =  False
-
-	# def view_update(self, context):
-	# 	pass
-
-	# def view_draw(self, context):
-	# 	w = context.region.width
-	# 	h = context.region.height
-
-	# 	bgl.glColor3f(1.0, 0.5, 0.0)
-	# 	bgl.glRectf(0, 0, w, h)
-
-	def render(self, scene):
-		VRayScene= scene.vray
-		VRayExporter= VRayScene.exporter
-
-		err = vb25.render.render(self, scene)
-
-		if err is not None:
-			self.report({'ERROR'}, err)
-
-
-
-class VRayRendererPreview(bpy.types.RenderEngine):
-	bl_idname      = 'VRAY_RENDER_PREVIEW'
-	bl_label       = "%s (material preview)" % VRAYBLENDER_MENU_ITEM
-	bl_use_preview = True
-
-	def render(self, scene):
-		VRayScene    = scene.vray
-		VRayExporter = VRayScene.exporter
-
-		if scene.name == "preview":
-			if scene.render.resolution_x < 64:
-				return
-			vb25.render.render(self, scene, preview=True)
-		else:
-			err = vb25.render.render(self, scene)
-
-			if err is not None:
-				self.report({'ERROR'}, err)
-
-
 class VRayMaterialNameMenu(bpy.types.Menu):
 	bl_label = "Select Material Name"
 	bl_idname = "VRayMaterialNameMenu"
@@ -1258,8 +1208,6 @@ def GetRegClasses():
 		VRAY_OT_set_kelvin_color,
 		VRAY_OT_add_sky,
 		VRAY_OT_copy_linked_materials,
-		VRayRenderer,
-		VRayRendererPreview,
 	)
 
 
