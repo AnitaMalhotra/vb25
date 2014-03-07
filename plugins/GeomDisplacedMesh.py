@@ -103,8 +103,8 @@ def add_properties(rna_pointer):
 		description= "Displacement amount",
 		min= -100.0,
 		max= 100.0,
-		soft_min= -0.1,
-		soft_max= 0.1,
+		soft_min= -1.0,
+		soft_max= 1.0,
 		precision= 5,
 		default= 0.02
 	)
@@ -340,19 +340,19 @@ def write(bus):
 
 
 def influence(context, layout, slot):
-	wide_ui= context.region.width > ui.narrowui
+	VRaySlot = slot.texture.vray_slot
 
-	VRaySlot= slot.texture.vray_slot
+	GeomDisplacedMesh = VRaySlot.GeomDisplacedMesh
 
-	GeomDisplacedMesh= VRaySlot.GeomDisplacedMesh
+	layout.label(text="Displacement:")
 
-	layout.label(text="Geometry:")
-
-	split= layout.split()
-	col= split.column()
-	ui.factor_but(col, VRaySlot, 'map_displacement', 'displacement_mult', "Displace")
-	if wide_ui:
-		col= split.column()
-	col.active= VRaySlot.map_displacement
-	col.prop(GeomDisplacedMesh, 'type')
-	col.prop(GeomDisplacedMesh, 'displacement_amount', slider=True)
+	split = layout.split()
+	col = split.column()
+	row = col.row()
+	row.prop(VRaySlot, 'map_displacement', text="")
+	sub = row.row()
+	sub.active = VRaySlot.map_displacement
+	sub.prop(GeomDisplacedMesh, 'displacement_amount')
+	sub = sub.row()
+	sub.scale_x = 0.5
+	sub.prop(GeomDisplacedMesh, 'type', text="")
