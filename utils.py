@@ -35,6 +35,7 @@ import shutil
 import string
 import struct
 import socket
+import stat
 import subprocess
 import sys
 import time
@@ -1036,6 +1037,10 @@ def proxy_creator(hq_filepath, vrmesh_filepath, append= False):
 
 		if os.path.exists(proxycreator_bin):
 			debug(None, "Proxy Creator: %s" % (proxycreator_bin))
+
+			mode = os.stat(proxycreator_bin).st_mode
+			if not mode & stat.S_IXUSR:
+				os.chmod(proxycreator_bin, mode | stat.S_IXUSR)
 
 			cmd= []
 			cmd.append(proxycreator_bin)
