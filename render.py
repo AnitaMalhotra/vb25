@@ -1218,6 +1218,8 @@ def write_scene(bus):
 			ExportFullRange(bus)
 		elif VRayExporter.animation_type in {'CAMERA'}:
 			ExportFullCamera(bus)
+		elif VRayExporter.animation_type in {'FRAMEBYFRAME'}:
+			WriteFrame(bus)
 	else:
 		if VRayExporter.camera_loop:
 			if not bus['cameras']:
