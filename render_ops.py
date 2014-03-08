@@ -48,9 +48,9 @@ from vb25.lib     import VRaySocket
 from vb25.utils   import *
 from vb25.plugins import *
 
-from vb25.vray_tools                 import VRayProxy
-from vb25.vray_tools.VRaySceneParser import GetMaterialsNames
-from vb25.vray_tools.VrmatParser     import GetXMLMaterialsNames
+from vb25.lib                 import VRayProxy
+from vb25.lib.VRaySceneParser import GetMaterialsNames
+from vb25.lib.VrmatParser     import GetXMLMaterialsNames
 
 
 VRAYBLENDER_MENU_ITEM= "V-Ray"

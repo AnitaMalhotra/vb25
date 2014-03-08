@@ -1,10 +1,10 @@
 #
-# V-Ray/Blender
+# V-Ray Python Tools
 #
-# http://vray.cgdo.ru
+# http://chaosgroup.com
 #
-# Author: Andrey M. Izrantsev (aka bdancer)
-# E-Mail: izrantsev@cgdo.ru
+# Author: Andrei Izrantcev
+# E-Mail: andrei.izrantcev@chaosgroup.com
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -22,10 +22,23 @@
 # All Rights Reserved. V-Ray(R) is a registered trademark of Chaos Software.
 #
 
-# VRay base classes
+from xml.dom import minidom
 
-__all__ = [
-	'VRayProxy',
-	'VRaySceneParser',
-	'VrmatParser',
-]
+
+def GetXMLMaterialsNames(filepath):
+    xmldoc = minidom.parse(filepath)
+
+    materialPluginNames = []
+
+    for item in xmldoc.getElementsByTagName('Asset'):
+        if item.attributes['type'].value == 'material':
+            url = str(item.attributes['url'].value)
+            if url.startswith("/"):
+                url = url[1:]
+            materialPluginNames.append(url)
+
+    return materialPluginNames
+
+
+if __name__ == '__main__':
+    print(GetXMLMaterialsNames("/home/bdancer/devel/vrayblender/bug-reports/andybot_vrmat/vray_mtl_metal1.vrmat"))
