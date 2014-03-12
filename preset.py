@@ -308,7 +308,6 @@ class VRAY_PRESET_global_render(VRAY_PRESETS, bpy.types.Operator):
 
 		"bpy.context.scene.vray.VRayDR.on",
 		"bpy.context.scene.vray.VRayDR.shared_dir",
-		"bpy.context.scene.vray.VRayDR.type",
 		"bpy.context.scene.vray.VRayDR.port",
 
 		"bpy.context.scene.render.threads_mode",

@@ -1037,7 +1037,7 @@ class VRAY_RP_dr(VRayRenderPanel, bpy.types.Panel):
 			layout.prop(VRayDR, 'type', text="Network type")
 
 			layout.prop(VRayDR, 'shared_dir')
-			if VRayDR.type == 'WW':
+			if PLATFORM == 'win32':
 				layout.prop(VRayDR, 'share_name')
 		else:
 			split= layout.split()

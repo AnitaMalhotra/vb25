@@ -153,7 +153,6 @@ bpy.context.scene.vray.SettingsColorMapping.adaptation_only = False
 bpy.context.scene.vray.SettingsColorMapping.linearWorkflow = False
 bpy.context.scene.vray.VRayDR.on = False
 bpy.context.scene.vray.VRayDR.shared_dir = ''
-bpy.context.scene.vray.VRayDR.type = 'WU'
 bpy.context.scene.vray.VRayDR.port = 20204
 bpy.context.scene.render.threads_mode = 'AUTO'
 bpy.context.scene.render.threads = 4

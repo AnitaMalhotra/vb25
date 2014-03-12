@@ -953,7 +953,7 @@ def get_full_filepath(bus, ob, filepath):
 			debug(scene, "\"%s\" is not a file!" % (src_file), error= True)
 			return src_file
 
-		if VRayDR.type == 'WW':
+		if PLATFORM == 'win32':
 			return "//%s/%s/%s/%s/%s"%(HOSTNAME,
 									   VRayDR.share_name,
 									   bus['filenames']['DR']['sub_dir'], component_subdir, src_filename)

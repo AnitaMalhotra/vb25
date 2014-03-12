@@ -548,12 +548,12 @@ def write_settings(bus):
 		if VRayDR.on and not SettingsOptions.misc_transferAssets:
 			if key == 'geometry':
 				for t in range(threadCount):
-					if VRayDR.type == 'WW':
+					if PLATFORM == 'win32':
 						ofile.write("\n#include \"//%s/%s/%s/%s_%.2i.vrscene\"" % (HOSTNAME, VRayDR.share_name, bus['filenames']['DR']['sub_dir'], os.path.basename(bus['filenames']['geometry'][:-11]), t))
 					else:
 						ofile.write("\n#include \"%s_%.2i.vrscene\"" % (bus['filenames']['DR']['prefix'] + os.sep + os.path.basename(bus['filenames']['geometry'][:-11]), t))
 			else:
-				if VRayDR.type == 'WW':
+				if PLATFORM == 'win32':
 					ofile.write("\n#include \"//%s/%s/%s/%s\"" % (HOSTNAME, VRayDR.share_name, bus['filenames']['DR']['sub_dir'], os.path.basename(bus['filenames'][key])))
 				else:
 					ofile.write("\n#include \"%s\"" % (bus['filenames']['DR']['prefix'] + os.sep + os.path.basename(bus['filenames'][key])))

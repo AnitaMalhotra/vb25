@@ -81,18 +81,6 @@ def add_properties(rna_pointer):
 		description= "Share name"
 	)
 
-	VRayDR.type= EnumProperty(
-		name= "Type",
-		description= "Distributed rendering network type",
-		items= (
-			('WW', "Windows - Windows", "Window master & Windows nodes."),
-			('WU', "Windows - Unix (TODO)", "Window master & Unix nodes."),
-			('UU', "Unix - Unix",       "Unix master & Unix nodes."),
-			('UW', "Unix - Windows (TODO)", "Unix master & Windows nodes."),
-		),
-		default= 'WW'
-	)
-
 
 	class VRayRenderNode(bpy.types.PropertyGroup):
 		pass
