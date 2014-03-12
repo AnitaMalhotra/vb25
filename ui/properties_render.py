@@ -355,32 +355,15 @@ class VRAY_RP_exporter(VRayRenderPanel, bpy.types.Panel):
 
 		layout.separator()
 
+		layout.label(text="Options:")
 		split= layout.split()
 		col= split.column()
-		col.label(text="Options:")
 		col.prop(ve, 'autorun')
 		col.prop(ve, 'display')
+		if wide_ui:
+			col= split.column()
 		col.prop(ve, 'autoclose')
-		col.prop(ve, 'debug')
-		if wide_ui:
-			col= split.column()
-		col.label(text="Mesh export:")
-		col.prop(ve, 'mesh_active_layers', text= "Active layers")
-		col.prop(ve, 'use_instances')
-		# col.prop(SettingsOptions, 'geom_displacement')
-		col.prop(ve, 'mesh_debug')
-
-		layout.separator()
-
-		layout.label(text="Rendering:")
-		split = layout.split()
-		col = split.column()
-		col.prop(ve, 'use_smoke')
-		col.prop(ve, 'use_smoke_hires', text = "Smoke HR")
-		if wide_ui:
-			col= split.column()
-		col.prop(ve, 'use_hair')
-		col.prop(ve, 'random_material', text="Randomize Materials")
+		col.prop(ve, 'debug', text="Export Debug")
 
 		layout.separator()
 
