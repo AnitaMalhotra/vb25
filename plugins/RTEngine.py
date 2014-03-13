@@ -385,9 +385,6 @@ class VRAY_RP_RTEngine(ui.VRayRenderPanel, bpy.types.Panel):
 		layout.separator()
 		layout.prop(RTEngine, 'use_opencl')
 
-		layout.separator()
-		layout.operator('vray.terminate', text="Terminate", icon='CANCEL')
-
 
 def GetRegClasses():
 	return (

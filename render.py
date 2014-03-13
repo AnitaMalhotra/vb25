@@ -1820,7 +1820,6 @@ def run(bus):
 			params.append('-rtTimeOut=%.3f' % (RTEngine.rtTimeOut))
 			params.append('-rtNoise=%.3f' % (RTEngine.rtNoise))
 			params.append('-rtSampleLevel=%i' % (RTEngine.rtSampleLevel))
-			params.append('-cmdMode=1')
 
 		params.append('-display=%i' % (VRayExporter.display))
 		params.append('-verboseLevel=%s' % (VRayExporter.verboseLevel))
