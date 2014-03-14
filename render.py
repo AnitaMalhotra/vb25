@@ -1817,9 +1817,16 @@ def run(bus):
 
 	else:
 		if RTEngine.enabled:
-			params.append('-rtTimeOut=%.3f' % (RTEngine.rtTimeOut))
-			params.append('-rtNoise=%.3f' % (RTEngine.rtNoise))
-			params.append('-rtSampleLevel=%i' % (RTEngine.rtSampleLevel))
+			DEVICE = {
+				'CPU'           : 1,
+				'OPENCL_SINGLE' : 3,
+				'OPENCL_MULTI'  : 4,
+				'CUDA_SINGLE'   : 5,
+			}
+			params.append('-rtEngine=%i' % DEVICE[RTEngine.use_opencl])
+			params.append('-rtTimeOut=%.3f'   % RTEngine.rtTimeOut)
+			params.append('-rtNoise=%.3f'     % RTEngine.rtNoise)
+			params.append('-rtSampleLevel=%i' % RTEngine.rtSampleLevel)
 
 		params.append('-display=%i' % (VRayExporter.display))
 		params.append('-verboseLevel=%s' % (VRayExporter.verboseLevel))

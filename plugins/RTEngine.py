@@ -177,7 +177,7 @@ def add_properties(rna_pointer):
 		description = "Computation Device",
 		items = (
 			('CPU',           "CPU",             ""),
-			('CUDA_SINGLE',   "CUDA (Single)",   ""),
+			('CUDA_SINGLE',   "CUDA",            ""),
 			('OPENCL_SINGLE', "OpenCL (Single)", ""),
 			('OPENCL_MULTI',  "OpenCL (Multi)",  ""),
 		),
@@ -289,20 +289,20 @@ def write(bus):
 	}
 
 	if RTEngine.enabled:
+		# XXX: When exporting this plugin termination params do not work!
 		# Write all the params to support previous versions
-		#
-		ofile.write("\n%s %s {" % (ID, ID))
-		for param in PARAMS:
-			if param == 'stereo_mode':
-				value = STEREO_MODE[RTEngine.stereo_mode]
-			elif param == 'stereo_focus':
-				value = STEREO_FOCUS[RTEngine.stereo_focus]
-			elif param == 'use_opencl':
-				value = DEVICE[RTEngine.use_opencl]
-			else:
-				value = getattr(RTEngine, param)
-			ofile.write("\n\t%s=%s;"%(param, p(value)))
-		ofile.write("\n}\n")
+		# ofile.write("\n%s %s {" % (ID, ID))
+		# for param in PARAMS:
+		# 	if param == 'stereo_mode':
+		# 		value = STEREO_MODE[RTEngine.stereo_mode]
+		# 	elif param == 'stereo_focus':
+		# 		value = STEREO_FOCUS[RTEngine.stereo_focus]
+		# 	elif param == 'use_opencl':
+		# 		value = DEVICE[RTEngine.use_opencl]
+		# 	else:
+		# 		value = getattr(RTEngine, param)
+		# 	ofile.write("\n\t%s=%s;"%(param, p(value)))
+		# ofile.write("\n}\n")
 
 		ofile.write("\nSettingsRTEngine settingsRT {")
 		for param in PARAMS_SETTINGS_RT_ENGINE:
@@ -311,7 +311,9 @@ def write(bus):
 			elif param == 'stereo_focus':
 				value = STEREO_FOCUS[RTEngine.stereo_focus]
 			elif param == 'use_opencl':
-				value = DEVICE[RTEngine.use_opencl]
+				# We will set it in command line
+				#value = DEVICE[RTEngine.use_opencl]
+				continue
 			else:
 				value = getattr(RTEngine, param)
 			ofile.write("\n\t%s=%s;"%(param, p(value)))
