@@ -330,6 +330,15 @@ class VRAY_RP_SettingsOptions(VRayRenderPanel, bpy.types.Panel):
 			col= split.column()
 		col.prop(SettingsOptions, 'mtl_transpCutoff')
 
+		layout.separator()
+		layout.label(text="Ray Intensity:")
+		split = layout.split()
+		col = split.column()
+		col.prop(SettingsOptions, 'ray_max_intensity_on')
+		col = split.column()
+		col.active = SettingsOptions.ray_max_intensity_on
+		col.prop(SettingsOptions, 'ray_max_intensity')
+
 
 class VRAY_RP_exporter(VRayRenderPanel, bpy.types.Panel):
 	bl_label   = "Exporter"

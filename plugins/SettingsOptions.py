@@ -71,6 +71,9 @@ PARAMS= (
 	'dr_assetsCacheLimitType',
 	'dr_assetsCacheLimitValue',
 	'dr_overwriteLocalCacheSettings',
+
+	'ray_max_intensity_on',
+	'ray_max_intensity',
 )
 
 
@@ -275,6 +278,19 @@ def add_properties(rna_pointer):
 			('2', "Size (GB)", "Assets are deleted from oldest to freshly received until the cache folder is below the specified size in gigabytes"),
 		),
 		default     = '0'
+	)
+
+	SettingsOptions.ray_max_intensity_on = BoolProperty(
+		name        = "Clamp Ray Intensity",
+		description = "Enable clamping of secondary rays",
+		default     = False
+	)
+
+	SettingsOptions.ray_max_intensity = FloatProperty(
+		name        = "Max Intensity",
+		description = "The max secondary ray intensity when \"Clamp Ray Max Itensity\" is enabled",
+		min         = 1.0,
+		default     = 20.0
 	)
 
 
