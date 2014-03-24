@@ -1043,8 +1043,6 @@ class VRAY_RP_dr(VRayRenderPanel, bpy.types.Panel):
 		layout.prop(SettingsOptions, 'misc_transferAssets')
 
 		if not SettingsOptions.misc_transferAssets:
-			layout.prop(VRayDR, 'type', text="Network type")
-
 			layout.prop(VRayDR, 'shared_dir')
 			if PLATFORM == 'win32':
 				layout.prop(VRayDR, 'share_name')
