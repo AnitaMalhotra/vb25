@@ -103,9 +103,9 @@ def add_properties(rna_pointer):
 			progressive_bundleSize = bpy.props.IntProperty(
 				name = "Bundle Size",
 				description = "The maximum number of samples for a pixel",
-				min = 32,
+				min = 1,
 				max = 1024,
-				default = 64
+				default = 32
 			)
 
 			progressive_showMask = bpy.props.BoolProperty(
