@@ -81,6 +81,22 @@ def add_properties(rna_pointer):
 		description= "Share name"
 	)
 
+	VRayDR.transferAssets = EnumProperty(
+		name        = "Transfer Assets",
+		description = "Transfer assets for distributed rendering",
+		items = (
+			('0', "Shared Directory", ""),
+			('1', "Auto Transfer", ""),
+			('2', "Auto Transfer (With Cache Check)", ""),
+		),
+		default = '0',
+	)
+
+	VRayDR.renderOnlyOnNodes= BoolProperty(
+		name        = "Render Only On Nodes",
+		description = "Use distributed rendering excluding the local machine",
+		default     = False
+	)
 
 	class VRayRenderNode(bpy.types.PropertyGroup):
 		pass

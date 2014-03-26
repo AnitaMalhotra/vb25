@@ -908,7 +908,7 @@ def get_full_filepath(bus, ob, filepath):
 	src_file = path_sep_to_unix(src_file)
 	src_file = os.path.normpath(src_file)
 
-	if VRayDR.on and not SettingsOptions.misc_transferAssets:
+	if VRayDR.on and VRayDR.transferAssets == '0':
 		# File name
 		src_filename= os.path.basename(src_file)
 
@@ -1222,7 +1222,7 @@ def init_files(bus):
 
 	# Distributed rendering
 	# filepath is relative = blend-file-name/filename
-	if VRayDR.on and not SettingsOptions.misc_transferAssets:
+	if VRayDR.on and VRayDR.transferAssets == '0':
 		abs_shared_dir  = os.path.normpath(bpy.path.abspath(VRayDR.shared_dir))
 		export_filepath = os.path.normpath(os.path.join(abs_shared_dir, blendfile_name + os.sep))
 
@@ -1254,7 +1254,7 @@ def init_files(bus):
 		if key == 'geometry':
 			filepath = os.path.join(export_directory, "%s_geometry_00.vrscene" % (export_filename))
 		else:
-			if key == 'scene' and (VRayDR.on and not SettingsOptions.misc_transferAssets):
+			if key == 'scene' and (VRayDR.on and VRayDR.transferAssets == '0'):
 				# Scene file MUST be on top of scene directory
 				filepath = os.path.normpath(os.path.join(export_directory, "..", "%s.vrscene" % (export_filename)))
 			else:

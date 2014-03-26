@@ -66,8 +66,6 @@ PARAMS= (
 	'misc_lowThreadPriority',
 
 	'misc_abortOnMissingAsset',
-	'misc_transferAssets',
-	'misc_useCachedAssets',
 	'dr_assetsCacheLimitType',
 	'dr_assetsCacheLimitValue',
 	'dr_overwriteLocalCacheSettings',
@@ -244,17 +242,6 @@ def add_properties(rna_pointer):
 		default     = False
 	)
 
-	SettingsOptions.misc_transferAssets = BoolProperty(
-		name        = "Transfer Assets",
-		description = "Transfer missing assets on DR",
-		default     = False
-	)
-
-	SettingsOptions.misc_useCachedAssets = BoolProperty(
-		name        = "Use Cached Assets",
-		description = "Use cached assets on DR",
-		default     = True
-	)
 	SettingsOptions.dr_overwriteLocalCacheSettings = BoolProperty(
 		name        = "Overwrite Cache Settings",
 		description = "If is true the client's cache settings will overwrite server settings",
@@ -301,6 +288,7 @@ def write(bus):
 	VRayScene       = scene.vray
 	VRayExporter    = VRayScene.exporter
 	SettingsOptions = VRayScene.SettingsOptions
+	VRayDR          = VRayScene.VRayDR
 
 	ofile.write("\nSettingsOptions SettingsOptions {")
 	for param in PARAMS:

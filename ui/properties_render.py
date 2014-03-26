@@ -1040,19 +1040,18 @@ class VRAY_RP_dr(VRayRenderPanel, bpy.types.Panel):
 		VRayDR          = VRayScene.VRayDR
 		SettingsOptions = VRayScene.SettingsOptions
 
-		layout.prop(SettingsOptions, 'misc_transferAssets')
+		layout.prop(VRayDR, 'transferAssets')
 
-		if not SettingsOptions.misc_transferAssets:
-			layout.prop(VRayDR, 'shared_dir')
+		if VRayDR.transferAssets == '0':
+			layout.prop(VRayDR, 'shared_dir', text="Share Path")
 			if PLATFORM == 'win32':
-				layout.prop(VRayDR, 'share_name')
+				layout.prop(VRayDR, 'share_name', text="Share Name")
 		else:
 			split= layout.split()
 			col= split.column()
+			col.prop(VRayDR, 'renderOnlyOnNodes')
 			col.prop(SettingsOptions, 'misc_abortOnMissingAsset')
 			col.prop(SettingsOptions, 'dr_overwriteLocalCacheSettings')
-			col= split.column()
-			col.prop(SettingsOptions, 'misc_useCachedAssets')
 			split= layout.split()
 			split.active = SettingsOptions.dr_overwriteLocalCacheSettings
 			col= split.column()

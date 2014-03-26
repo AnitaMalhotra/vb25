@@ -545,7 +545,7 @@ def write_settings(bus):
 			# Skip some files
 			continue
 
-		if VRayDR.on and not SettingsOptions.misc_transferAssets:
+		if VRayDR.on and VRayDR.transferAssets == '0':
 			if key == 'geometry':
 				for t in range(threadCount):
 					if PLATFORM == 'win32':
@@ -1861,11 +1861,13 @@ def run(bus):
 
 		if VRayDR.on:
 			if len(VRayDR.nodes):
-				params.append('-distributed=1')
+				params.append('-distributed=%s' % ('2' if VRayDR.renderOnlyOnNodes else '1'))
 				params.append('-portNumber=%i' % (VRayDR.port))
 				params.append('-renderhost=%s' % Quotes(';'.join([n.address for n in VRayDR.nodes if n.use])))
-				if not SettingsOptions.misc_transferAssets:
+				if VRayDR.transferAssets == '0':
 					params.append('-include=%s' % Quotes(bus['filenames']['DR']['shared_dir'] + os.sep))
+				else:
+					params.append('-transferAssets=%s' % VRayDR.transferAssets)
 
 		if image_to_blender:
 			params.append('-imgFile=%s' % Quotes(image_file))
