@@ -1266,7 +1266,10 @@ def init_files(bus):
 	# Distributed rendering
 	# filepath is relative = blend-file-name/filename
 	if VRayDR.on and VRayDR.transferAssets == '0':
-		abs_shared_dir  = os.path.normpath(bpy.path.abspath(VRayDR.shared_dir))
+		sharedDir = VRayDR.shared_dir
+		if sharedDir == "":
+			sharedDir = default_dir
+		abs_shared_dir  = os.path.normpath(bpy.path.abspath(sharedDir))
 		export_filepath = os.path.normpath(os.path.join(abs_shared_dir, blendfile_name + os.sep))
 
 		bus['filenames']['DR']               = {}
@@ -1286,33 +1289,39 @@ def init_files(bus):
 
 	export_directory = create_dir(export_filepath)
 
-	# XXX: Ugly... If there were some error there could be some open files left
+	# If we use "Transfer Assets" feature we will export everything to a single file
 	#
-	for key in bus['files']:
-		f = bus['files']
-		if f and not f.closed:
-			f.close()
+	if VRayDR.on and VRayDR.transferAssets != '0':
+		outFilepath = os.path.normpath(os.path.join(export_directory, "%s.vrscene" % export_filename))
+		outFile = open(outFilepath, 'w')
 
-	for key in ('geometry', 'lights', 'materials', 'textures', 'nodes', 'camera', 'scene', 'environment'):
-		if key == 'scene' and (VRayDR.on and not SettingsOptions.misc_transferAssets):
-			# Scene file MUST be on top of scene directory
-			filepath = os.path.normpath(os.path.join(export_directory, "..", "%s.vrscene" % (export_filename)))
-		else:
-			filepath = os.path.normpath(os.path.join(export_directory, "%s_%s.vrscene" % (export_filename, key)))
+		for key in ('geometry', 'lights', 'materials', 'textures', 'nodes', 'camera', 'scene', 'environment'):
+			bus['files'][key]     = outFile
+			bus['filenames'][key] = outFilepath
 
-		if not VRayExporter.auto_meshes and key == 'geometry':
-			bus['files'][key] = None
-		else:
-			bus['files'][key] = open(filepath, 'w')
-
-		bus['filenames'][key] = filepath
-
-	# Duplicate "Color mapping" setting to a separate file for correct preview
+	# Otherwise will we export files separately as usual
 	#
-	cmFilepath = getColorMappingFilepath()
-	bus['filenames']['colorMapping'] = cmFilepath
-	if not bus['preview']:
-		bus['files']['colorMapping'] = open(cmFilepath, 'w')
+	else:
+		for key in ('geometry', 'lights', 'materials', 'textures', 'nodes', 'camera', 'scene', 'environment'):
+			if key == 'scene' and (VRayDR.on and VRayDR.transferAssets == '0'):
+				# Scene file MUST be on top of scene directory
+				filepath = os.path.normpath(os.path.join(export_directory, "..", "%s.vrscene" % (export_filename)))
+			else:
+				filepath = os.path.normpath(os.path.join(export_directory, "%s_%s.vrscene" % (export_filename, key)))
+
+			if not VRayExporter.auto_meshes and key == 'geometry':
+				bus['files'][key] = None
+			else:
+				bus['files'][key] = open(filepath, 'w')
+
+			bus['filenames'][key] = filepath
+
+		# Duplicate "Color mapping" settings to a separate file for correct preview
+		#
+		cmFilepath = getColorMappingFilepath()
+		bus['filenames']['colorMapping'] = cmFilepath
+		if not bus['preview']:
+			bus['files']['colorMapping'] = open(cmFilepath, 'w')
 
 	# Render output dir
 	bus['filenames']['output'] = create_dir(output_filepath, pathOnly=not VRayExporter.auto_save_render)

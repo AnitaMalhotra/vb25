@@ -319,24 +319,25 @@ def write_settings(bus):
 		bus['files']['scene'].write("\n\tsubdivs_mult= 0.1;")
 		bus['files']['scene'].write("\n}\n")
 
-	for key in bus['filenames']:
-		if key in {'output', 'output_filename', 'output_loadfile', 'lightmaps', 'scene', 'DR'}:
-			# Skip some files
-			continue
-		if VRayDR.on and not SettingsOptions.misc_transferAssets:
-			if VRayDR.type == 'WW':
-				ofile.write("\n#include \"//%s/%s/%s/%s\"" % (HOSTNAME, VRayDR.share_name, bus['filenames']['DR']['sub_dir'], os.path.basename(bus['filenames'][key])))
+	if VRayDR.on and VRayDR.transferAssets != '0':
+		pass
+	else:
+		for key in bus['filenames']:
+			if key in {'output', 'output_filename', 'output_loadfile', 'lightmaps', 'scene', 'DR'}:
+				# Skip some files
+				continue
+			if VRayDR.on and VRayDR.transferAssets == '0':
+				if PLATFORM == 'win32':
+					ofile.write("\n#include \"//%s/%s/%s/%s\"" % (HOSTNAME, VRayDR.share_name, bus['filenames']['DR']['sub_dir'], os.path.basename(bus['filenames'][key])))
+				else:
+					ofile.write("\n#include \"%s\"" % (bus['filenames']['DR']['prefix'] + os.sep + os.path.basename(bus['filenames'][key])))
 			else:
-				ofile.write("\n#include \"%s\"" % (bus['filenames']['DR']['prefix'] + os.sep + os.path.basename(bus['filenames'][key])))
-		else:
-			if bus['preview'] and key in {'colorMapping'}:
-				if key == 'colorMapping':
+				if bus['preview'] and key == 'colorMapping':
 					if os.path.exists(bus['filenames'][key]):
 						ofile.write("\n#include \"%s\"" % bus['filenames'][key])
-				# if key == 'geometry':
-				# 	ofile.write("\n#include \"%s\"" % os.path.join(get_vray_exporter_path(), "preview", "preview_geometry.vrscene"))
-			else:
-				ofile.write("\n#include \"%s\"" % os.path.basename(bus['filenames'][key]))
+				else:
+					ofile.write("\n#include \"%s\"" % os.path.basename(bus['filenames'][key]))
+
 	ofile.write("\n")
 
 	if Includer.use:
@@ -1534,10 +1535,12 @@ def export_and_run(bus):
 		bus['engine'].report({'ERROR'}, "Export error! Check system console!")
 
 	for key in bus['files']:
-		if bus['files'][key] is None:
+		f = bus['files'][key]
+		if f is None:
 			continue
-		bus['files'][key].write("\n")
-		bus['files'][key].close()
+		if not f.closed:
+			f.write("\n")
+			f.close()
 
 	if err:
 		bus['engine'].report({'ERROR'}, "Export error!")

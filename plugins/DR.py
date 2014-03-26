@@ -89,7 +89,7 @@ def add_properties(rna_pointer):
 			('1', "Auto Transfer", ""),
 			('2', "Auto Transfer (With Cache Check)", ""),
 		),
-		default = '0',
+		default = '1',
 	)
 
 	VRayDR.renderOnlyOnNodes= BoolProperty(

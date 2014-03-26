@@ -209,5 +209,8 @@ def write(bus):
 
 	cmData = getColorMappingData(bus['scene'])
 
-	bus['files']['colorMapping'].write(cmData)
+	# For example for DR we don't write this file
+	if 'colorMapping' in bus['files']:
+		bus['files']['colorMapping'].write(cmData)
+
 	bus['files']['scene'].write(cmData)
