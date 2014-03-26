@@ -1808,6 +1808,10 @@ def run(bus):
 	if not scene.render.threads_mode == 'AUTO':
 		params.append('-numThreads=%i' % (scene.render.threads))
 
+	image_to_blender = VRayExporter.auto_save_render and VRayExporter.image_to_blender
+	if bus['preview']:
+		image_to_blender = False
+
 	if bus['preview']:
 		params.append('-imgFile=%s' % Quotes(preview_file))
 		params.append('-showProgress=0')
@@ -1863,10 +1867,8 @@ def run(bus):
 				if not SettingsOptions.misc_transferAssets:
 					params.append('-include=%s' % Quotes(bus['filenames']['DR']['shared_dir'] + os.sep))
 
-		if VRayExporter.auto_save_render or VRayExporter.image_to_blender:
+		if image_to_blender:
 			params.append('-imgFile=%s' % Quotes(image_file))
-
-		if VRayExporter.auto_save_render and VRayExporter.image_to_blender:
 			params.append('-autoclose=1')
 
 	if PLATFORM == "linux":
@@ -2010,7 +2012,7 @@ def run(bus):
 			proc.kill()
 
 			# Load final result image to Blender
-			if VRayExporter.image_to_blender and not proc_interrupted:
+			if image_to_blender and not proc_interrupted:
 				if load_file.endswith('vrimg'):
 					# VRayImage (.vrimg) loaing is not supported
 					debug(None, "VRayImage loading is not supported. Final image will not be loaded.")
@@ -2032,7 +2034,7 @@ def run(bus):
 		if not isinstance(engine, bpy.types.RenderEngine):
 			return
 
-		if engine is not None and (bus['preview'] or VRayExporter.image_to_blender) and not scene.render.use_border:
+		if engine is not None and (bus['preview'] or image_to_blender) and not scene.render.use_border:
 			while True:
 				if engine.test_break():
 					try:
