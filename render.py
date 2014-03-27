@@ -1005,7 +1005,8 @@ def WriteFrame(bus, firstFrame=True, checkAnimated='NONE'):
 	if VRayExporter.animation:
 		exportGeometry = True if firstFrame else VRayExporter.animation_type not in {'NOTMESHES', 'CAMERA'}
 
-	_vray_for_blender.setSkipObjects(bus['exporter'], UtilsBlender.GetObjectExcludeList(bus['scene']))
+	_vray_for_blender.setSkipObjects(bus['exporter'], UtilsBlender.GetEffectsExcludeList(bus['scene']))
+	_vray_for_blender.setHideFromView(bus['exporter'], UtilsBlender.GetCameraHideLists(bus['camera']))
 	_vray_for_blender.exportScene(bus['exporter'], exportNodes, exportGeometry)
 	_vray_for_blender.clearCache()
 

@@ -22,6 +22,9 @@
 # All Rights Reserved. V-Ray(R) is a registered trademark of Chaos Software.
 #
 
+import bpy
+
+
 def ObjectMaterialsIt(objects):
     for ob in objects:
         if not len(ob.material_slots):
@@ -65,22 +68,6 @@ def GetPreviewTexture(ob):
     return slot.texture
 
 
-def GetObjectExcludeList(scene):
-    VRayScene = scene.vray
-    exclude_list = []
-    VRayEffects  = VRayScene.VRayEffects
-    if VRayEffects.use:
-        for effect in VRayEffects.effects:
-            if effect.use:
-                if effect.type == 'FOG':
-                    EnvironmentFog = effect.EnvironmentFog
-                    fog_objects = generate_object_list(EnvironmentFog.objects, EnvironmentFog.groups)
-                    for ob in fog_objects:
-                        if ob not in exclude_list:
-                            exclude_list.append(ob.as_pointer())
-    return exclude_list
-
-
 def IsAnimated(o):
     if o.animation_data and o.animation_data.action:
         return True
@@ -95,3 +82,69 @@ def IsDataAnimated(o):
     if o.data.animation_data and o.data.animation_data.action:
         return True
     return False
+
+
+def GetObjectList(object_names_string=None, group_names_string=None):
+    object_list = []
+
+    if object_names_string:
+        ob_names = object_names_string.split(';')
+        for ob_name in ob_names:
+            if ob_name in bpy.data.objects:
+                object_list.append(bpy.data.objects[ob_name])
+
+    if group_names_string:
+        gr_names = group_names_string.split(';')
+        for gr_name in gr_names:
+            if gr_name in bpy.data.groups:
+                object_list.extend(bpy.data.groups[gr_name].objects)
+
+    dupliGroup = []
+    for ob in object_list:
+        if ob.dupli_type == 'GROUP' and ob.dupli_group:
+            dupliGroup.extend(ob.dupli_group.objects)
+    object_list.extend(dupliGroup)
+
+    return object_list
+
+
+def GetCameraHideLists(camera):
+    VRayCamera = camera.data.vray
+
+    visibility = {
+        'all'     : set(),
+        'camera'  : set(),
+        'gi'      : set(),
+        'reflect' : set(),
+        'refract' : set(),
+        'shadows' : set(),
+    }
+
+    if VRayCamera.hide_from_view:
+        for hide_type in visibility:
+            if getattr(VRayCamera, 'hf_%s' % hide_type):
+                if getattr(VRayCamera, 'hf_%s_auto' % hide_type):
+                    obList = GetObjectList(group_names_string='hf_%s' % camera.name)
+                else:
+                    obList = GetObjectList(getattr(VRayCamera, 'hf_%s_objects' % hide_type),
+                                           getattr(VRayCamera, 'hf_%s_groups' % hide_type))
+                for o in obList:
+                    visibility[hide_type].add(o.as_pointer())
+
+    return visibility
+
+
+def GetEffectsExcludeList(scene):
+    VRayScene = scene.vray
+    exclude_list = []
+    VRayEffects  = VRayScene.VRayEffects
+    if VRayEffects.use:
+        for effect in VRayEffects.effects:
+            if effect.use:
+                if effect.type == 'FOG':
+                    EnvironmentFog = effect.EnvironmentFog
+                    fog_objects = GetObjectList(EnvironmentFog.objects, EnvironmentFog.groups)
+                    for ob in fog_objects:
+                        if ob not in exclude_list:
+                            exclude_list.append(ob.as_pointer())
+    return exclude_list
