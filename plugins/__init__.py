@@ -638,8 +638,7 @@ def add_properties():
 		causticSubdivs= IntProperty(
 			name= "Caustic subdivs",
 			description= "Caustic subdivisions. Lower values mean more noisy results, but will render faster. Higher values produce smoother results but take more time",
-			min= 1,
-			max= 100000,
+			min= 0,
 			default= 1000
 		)
 
@@ -647,9 +646,7 @@ def add_properties():
 			name= "Caustics multiplier",
 			description= "Caustics multiplier",
 			min= 0.0,
-			max= 1.0,
 			soft_min= 0.0,
-			soft_max= 1.0,
 			precision= 3,
 			default= 1
 		)
