@@ -104,6 +104,7 @@ class VRAY_DP_light(VRayLampPanel, bpy.types.Panel):
 			col.prop(VRayLamp,'intensity', text="Intensity")
 		col.prop(VRayLamp,'subdivs')
 		col.prop(VRayLamp,'causticSubdivs', text="Caustics")
+		col.prop(VRayLamp,'causticMult', text="Caustics Mult")
 
 		if wide_ui:
 			col= split.column()
