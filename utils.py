@@ -1322,3 +1322,16 @@ def load_result(engine, w, h, filepath):
 	except:
 		pass
 	engine.end_result(result)
+
+
+def GetStrSize(nBytes):
+	BytesSuffix = (
+		(1<<30, 'GB'),
+		(1<<20, 'MB'),
+		(1<<10, 'kB'),
+		(1,     'bytes'),
+	)
+	for b,s in BytesSuffix:
+		if nBytes > b:
+			break
+	return "%.2f %s" % (nBytes/b, s)
