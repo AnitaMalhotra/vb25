@@ -76,9 +76,8 @@ def add_properties(parent_struct):
 		name= "Max photons",
 		description= "TODO",
 		min= 0,
-		max= 10000,
 		soft_min= 0,
-		soft_max= 1000,
+		soft_max= 10000,
 		default= 30
 	)
 
@@ -87,7 +86,7 @@ def add_properties(parent_struct):
 		description= "TODO",
 		subtype= 'DISTANCE',
 		min= 0.0,
-		max= 100.0,
+		max= 1000.0,
 		soft_min= 0.0,
 		soft_max= 1.0,
 		precision= 3,
@@ -98,7 +97,7 @@ def add_properties(parent_struct):
 		name= "Max density",
 		description= "TODO",
 		min= 0.0,
-		max= 100.0,
+		max= 1000.0,
 		soft_min= 0.0,
 		soft_max= 10.0,
 		precision= 3,
@@ -109,7 +108,7 @@ def add_properties(parent_struct):
 		name= "Multiplier",
 		description= "TODO",
 		min= 0.0,
-		max= 100.0,
+		max= 1000.0,
 		soft_min= 0.0,
 		soft_max= 10.0,
 		precision= 3,
@@ -202,7 +201,7 @@ class RENDER_PT_SettingsCaustics(ui.VRayRenderPanel, bpy.types.Panel):
 			return False
 		show= scene.vray.SettingsCaustics.on
 		return (show and ui.engine_poll(__class__, context))
-	
+
 	def draw(self, context):
 		wide_ui= context.region.width > ui.narrowui
 		layout= self.layout
@@ -213,16 +212,20 @@ class RENDER_PT_SettingsCaustics(ui.VRayRenderPanel, bpy.types.Panel):
 		layout.prop(vmodule,'mode')
 
 		if vmodule.mode == 'FILE':
+			layout.separator()
 			layout.prop(vmodule,'file')
-		else:
-			split= layout.split()
-			col= split.column()
-			col.prop(vmodule,'multiplier')
-			col.prop(vmodule,'search_distance')
-			if wide_ui:
-				col = split.column()
-			col.prop(vmodule,'max_photons')
-			col.prop(vmodule,'max_density')
+			layout.separator()
+
+		split= layout.split()
+		col= split.column()
+		col.prop(vmodule,'multiplier')
+		col.prop(vmodule,'search_distance')
+		if wide_ui:
+			col = split.column()
+		col.prop(vmodule,'max_photons')
+		col.prop(vmodule,'max_density')
+
+		if not vmodule.mode == 'FILE':
 			col.prop(vmodule,'show_calc_phase')
 
 			split= layout.split()
