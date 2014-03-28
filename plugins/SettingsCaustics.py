@@ -24,6 +24,7 @@
   
 '''
 
+import os
 
 ''' Blender modules '''
 import bpy
@@ -214,6 +215,13 @@ class RENDER_PT_SettingsCaustics(ui.VRayRenderPanel, bpy.types.Panel):
 		if vmodule.mode == 'FILE':
 			layout.separator()
 			layout.prop(vmodule,'file')
+
+			filePath = vmodule.file
+			photonMapSize = "0 bytes"
+			if os.path.exists(filePath):
+				photonMapSize = GetStrSize(os.stat(filePath).st_size)
+
+			layout.label("Photon map takes %s." % photonMapSize)
 			layout.separator()
 
 		split= layout.split()
