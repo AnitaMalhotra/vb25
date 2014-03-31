@@ -32,21 +32,25 @@ import bpy
 from vb25.ui.ui import *
 
 
+def GetContextData(context):
+	if context.active_object.type == 'MESH':
+		return context.mesh
+	else:
+		return context.curve
+	return data
+
+
 class VRAY_DP_override(VRayDataPanel, bpy.types.Panel):
 	bl_label   = "Options"
 	bl_options = {'DEFAULT_CLOSED'}
-
-	COMPAT_ENGINES = {'VRAY_RENDER','VRAY_RENDERER','VRAY_RENDER_PREVIEW'}
-
-	@classmethod
-	def poll(cls, context):
-		return (context.mesh and engine_poll(__class__, context))
 
 	def draw(self, context):
 		wide_ui = context.region.width > narrowui
 		layout  = self.layout
 
-		VRayMesh = context.mesh.vray
+		data = GetContextData(context)
+
+		VRayMesh = data.vray
 		GeomStaticMesh = VRayMesh.GeomStaticMesh
 
 		layout.prop(VRayMesh, 'override')
@@ -82,18 +86,14 @@ class VRAY_DP_tools(VRayDataPanel, bpy.types.Panel):
 	bl_label   = "Tools"
 	bl_options = {'DEFAULT_CLOSED'}
 
-	COMPAT_ENGINES = {'VRAY_RENDER','VRAY_RENDERER','VRAY_RENDER_PREVIEW'}
-
-	@classmethod
-	def poll(cls, context):
-		return (context.mesh and engine_poll(__class__, context))
-
 	def draw(self, context):
 		wide_ui= context.region.width > narrowui
 
 		layout= self.layout
 
-		VRayMesh=     context.mesh.vray
+		data = GetContextData(context)
+
+		VRayMesh=     data.vray
 		GeomMeshFile= VRayMesh.GeomMeshFile
 
 		layout.label(text="Generate VRayProxy:")
