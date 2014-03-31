@@ -101,6 +101,8 @@ def texture_type_poll(cls, context, tex, tex_type):
 
 
 class VRayPanel:
+	COMPAT_ENGINES = {'VRAY_RENDER','VRAY_RENDERER','VRAY_RENDER_PREVIEW'}
+
 	def draw_header(self, context):
 		self.layout.label(text="", icon='VRAY_LOGO_MONO')
 
@@ -112,7 +114,9 @@ class VRayDataPanel(VRayPanel):
 
 	@classmethod
 	def poll(cls, context):
-		return engine_poll(cls, context)
+		if not engine_poll(cls, context):
+			return False
+		return context.mesh or context.curve
 
 
 class VRayLampPanel():
