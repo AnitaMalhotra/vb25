@@ -49,7 +49,7 @@ PARAMS= (
 	'multiplier',
 	'mode',
 	'file',
-	# 'dont_delete',
+	'dont_delete',
 	'auto_save',
 	'auto_save_file',
 	'show_calc_phase'
@@ -150,11 +150,10 @@ def add_properties(parent_struct):
 		default= False
 	)
 
-	# SettingsCaustics.dont_delete= BoolProperty(
-	# 	name= "Don\'t delete",
-	# 	description= "TODO",
-	# 	default= False
-	# )
+	SettingsCaustics.dont_delete= BoolProperty(
+		name = "Don\'t delete",
+		default = False
+	)
 
 
 
@@ -234,7 +233,11 @@ class RENDER_PT_SettingsCaustics(ui.VRayRenderPanel, bpy.types.Panel):
 		col.prop(vmodule,'max_density')
 
 		if not vmodule.mode == 'FILE':
-			col.prop(vmodule,'show_calc_phase')
+			split = layout.split()
+			col = split.column()
+			col.prop(vmodule, 'dont_delete')
+			col = split.column()
+			col.prop(vmodule, 'show_calc_phase')
 
 			split= layout.split()
 			split.label(text="Files:")
