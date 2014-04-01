@@ -710,6 +710,34 @@ class VRAY_OT_flip_resolution(bpy.types.Operator):
 		return {'FINISHED'}
 
 
+def LoadProxyMeshToObject(ob, filepath, anim_type, anim_offset, anim_speed, anim_frame):
+	meshFile = VRayProxy.MeshFile(filepath)
+
+	err = meshFile.readFile()
+	if err is not None:
+		return "Error parsing VRayProxy file!"
+
+	meshData = meshFile.getPreviewMesh(anim_type, anim_offset, anim_speed, anim_frame)
+	if meshData is None:
+		return "Can't find preview voxel!"
+
+	meshName = bpy.path.clean_name(os.path.basename(filepath))
+
+	# Add new mesh
+	mesh = bpy.data.meshes.new(meshName)
+	mesh.from_pydata(meshData['vertices'], [], meshData['faces'])
+	mesh.update()
+
+	# Replace object's mesh
+	bm = bmesh.new()
+	bm.from_mesh(mesh)
+	bm.to_mesh(ob.data)
+	ob.data.update()
+
+	# Remove temp
+	bm.free()
+	bpy.data.meshes.remove(mesh)
+
 
 class VRAY_OT_proxy_load_preview(bpy.types.Operator):
 	bl_idname      = "vray.proxy_load_preview"
@@ -717,47 +745,24 @@ class VRAY_OT_proxy_load_preview(bpy.types.Operator):
 	bl_description = "Load VRayProxy mesh preview from file"
 
 	def execute(self, context):
-		originalMesh = context.object.data
-		GeomMeshFile = originalMesh.vray.GeomMeshFile
+		GeomMeshFile = context.object.data.vray.GeomMeshFile
 
 		proxyFilepath = os.path.normpath(path_sep_to_unix(bpy.path.abspath(GeomMeshFile.file)))
-		proxyFilename = os.path.basename(proxyFilepath)
 
-		meshFile = VRayProxy.MeshFile(proxyFilepath)
-
-		result = meshFile.readFile()
-		if result is not None:
-			self.report({'ERROR'}, "Error parsing VRayProxy file!")
-			return {'FINISHED'}
-
-		meshData = meshFile.getPreviewMesh(
+		err = LoadProxyMeshToObject(
+			context.object,
+			proxyFilepath,
 			GeomMeshFile.anim_type,
 			GeomMeshFile.anim_offset,
 			GeomMeshFile.anim_speed,
 			context.scene.frame_current-1
 		)
 
-		if meshData is None:
-			self.report({'ERROR'}, "Can't find preview voxel!")
-			return {'FINISHED'}
-
-		mesh = bpy.data.meshes.new("VRayProxyPreview")
-		mesh.from_pydata(meshData['vertices'], [], meshData['faces'])
-		mesh.update()
-
-		# Replace object mesh
-		bm = bmesh.new()
-		bm.from_mesh(mesh)
-		bm.to_mesh(context.object.data)
-
-		context.object.data.update()
-
-		# Remove temp
-		bm.free()
-		bpy.data.meshes.remove(mesh)
+		if err is not None:
+			self.report({'ERROR'}, err)
+			return {'CANCELLED'}
 
 		return {'FINISHED'}
-
 
 
 class VRAY_OT_create_proxy(bpy.types.Operator):
@@ -771,11 +776,10 @@ class VRAY_OT_create_proxy(bpy.types.Operator):
 		VRayScene    = sce.vray
 		VRayExporter = VRayScene.exporter
 
+		@TimeIt("Proxy generated in")
 		def _create_proxy(ob):
-			if ob.type in ('LAMP','CAMERA','ARMATURE','LATTICE','EMPTY'):
+			if ob.type in {'LAMP', 'CAMERA', 'ARMATURE', 'LATTICE', 'EMPTY'}:
 				return
-
-			timer= time.clock()
 
 			GeomMeshFile= ob.data.vray.GeomMeshFile
 
@@ -821,70 +825,67 @@ class VRAY_OT_create_proxy(bpy.types.Operator):
 
 			VRayMesh= ob.data.vray
 
-			if GeomMeshFile.mode != 'NONE':
-				if GeomMeshFile.mode in ('THIS','REPLACE'):
-					if GeomMeshFile.add_suffix:
-						ob.name+= '_proxy'
-						ob.data.name+= '_proxy'
+			if GeomMeshFile.mode == 'NONE':
+				return
+			elif GeomMeshFile.mode in {'THIS', 'REPLACE'}:
+				if GeomMeshFile.add_suffix:
+					ob.name += '_proxy'
 
-				if GeomMeshFile.mode == 'THIS':
-					VRayMesh.override= True
-					VRayMesh.override_type= 'VRAYPROXY'
-					GeomMeshFile.file= bpy.path.relpath(vrmesh_filepath)
+				# Override settings
+				VRayMesh.override      = True
+				VRayMesh.override_type = 'VRAYPROXY'
+				GeomMeshFile.file = bpy.path.relpath(vrmesh_filepath)
 
-				bbox_faces= ((0,1,2,3),(4,7,6,5),(0,4,5,1),(1,5,6,2),(2,6,7,3),(4,0,3,7))
-				bbox_mesh= bpy.data.meshes.new(ob_data_name+'_proxy')
-				bbox_mesh.from_pydata(ob.bound_box, [], bbox_faces)
-				bbox_mesh.update()
-
-				if GeomMeshFile.mode in ('NEW','REPLACE'):
-					for slot in ob.material_slots:
-						if slot and slot.material:
-							bbox_mesh.materials.append(slot.material)
-
-				if GeomMeshFile.mode == 'NEW':
-					new_ob= bpy.data.objects.new(ob_name+'_proxy', bbox_mesh)
-					sce.objects.link(new_ob)
-					new_ob.matrix_world= ob.matrix_world
-					new_ob.draw_type= 'WIRE'
-					bpy.ops.object.select_all(action='DESELECT')
-					new_ob.select= True
-					sce.objects.active= new_ob
+				# Load preview mesh
+				if GeomMeshFile.mode == 'REPLACE':
+					LoadProxyMeshToObject(
+						ob,
+						vrmesh_filepath,
+						GeomMeshFile.anim_type,
+						GeomMeshFile.anim_offset,
+						GeomMeshFile.anim_speed,
+						context.scene.frame_current-1
+					)
 
 					if GeomMeshFile.apply_transforms:
 						ob.select= True
 						sce.objects.active= ob
 						bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
 
-					VRayMesh= new_ob.data.vray
-					VRayMesh.override= True
-					VRayMesh.override_type= 'VRAYPROXY'
+			elif GeomMeshFile.mode == 'NEW':
+				# Create new object and copy materials
+				new_ob= bpy.data.objects.new(ob_name+'_proxy', bpy.data.meshes.new(ob_name+'_proxy'))
+				sce.objects.link(new_ob)
+				new_ob.matrix_world= ob.matrix_world
+				bpy.ops.object.select_all(action='DESELECT')
+				new_ob.select= True
+				sce.objects.active= new_ob
 
-					GeomMeshFile= VRayMesh.GeomMeshFile
-					GeomMeshFile.file= bpy.path.relpath(vrmesh_filepath)
+				LoadProxyMeshToObject(
+					new_ob,
+					vrmesh_filepath,
+					GeomMeshFile.anim_type,
+					GeomMeshFile.anim_offset,
+					GeomMeshFile.anim_speed,
+					context.scene.frame_current-1
+				)
 
-				elif GeomMeshFile.mode == 'REPLACE':
-					bm = bmesh.new()
-					bm.from_mesh(bbox_mesh)
-					bm.to_mesh(ob.data)
-					bm.free()
+				for slot in ob.material_slots:
+					if slot and slot.material:
+						new_ob.data.materials.append(slot.material)
 
-					ob.draw_type = 'WIRE'
-					for md in ob.modifiers: ob.modifiers.remove(md)
+				if GeomMeshFile.apply_transforms:
+					ob.select= True
+					sce.objects.active= ob
+					bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
 
-					if GeomMeshFile.apply_transforms:
-						ob.select= True
-						sce.objects.active= ob
-						bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+				VRayMesh= new_ob.data.vray
+				VRayMesh.override= True
+				VRayMesh.override_type= 'VRAYPROXY'
 
-					VRayMesh= ob.data.vray
-					VRayMesh.override= True
-					VRayMesh.override_type= 'VRAYPROXY'
+				GeomMeshFile= VRayMesh.GeomMeshFile
+				GeomMeshFile.file= bpy.path.relpath(vrmesh_filepath)
 
-					GeomMeshFile= VRayMesh.GeomMeshFile
-					GeomMeshFile.file= bpy.path.relpath(vrmesh_filepath)
-			debug(context.scene, "Proxy generation total time: %.2f\n" % (time.clock() - timer))
-		
 		if len(bpy.context.selected_objects):
 			for ob in bpy.context.selected_objects:
 				_create_proxy(ob)
