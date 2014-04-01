@@ -141,13 +141,6 @@ def add_properties(rna_pointer):
 		default= False
 	)
 
-	VRayStereoscopicSettings.deep_pixel_mode= BoolProperty(
-		name= "Deep Pixel Mode",
-		description= "Enable deep pixel shademap mode: save DOF & motion blur, weight, camera Z coordinate",
-		default= True
-	)
-
-
 	VRayStereoscopicSettings.reuse_threshold= FloatProperty(
 		name= "Reuse Threshold",
 		description= "Lower values will make V-Ray use less of the shade map and more real shading",
@@ -235,7 +228,6 @@ def write(bus):
 		ofile.write("\n\tsm_mode=%s;" % p(SM_MODE[StereoSettings.sm_mode]))
 		ofile.write("\n\tadjust_resolution=%s;" % p(StereoSettings.adjust_resolution))
 		ofile.write("\n\tshademap_file=\"%s\";" % path_sep_to_unix(bpy.path.abspath(StereoSettings.shademap_file)))
-		ofile.write("\n\tdeep_pixel_mode=%s;" % p(StereoSettings.deep_pixel_mode))
 		ofile.write("\n\treuse_threshold=%s;" % p(StereoSettings.reuse_threshold))
 		#ofile.write("\n\texclude_list=%s;" % p(StereoSettings.exclude_list))
 
