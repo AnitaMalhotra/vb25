@@ -1335,3 +1335,14 @@ def GetStrSize(nBytes):
 		if nBytes > b:
 			break
 	return "%.2f %s" % (nBytes/b, s)
+
+
+def TimeIt(label):
+	def real_decorator(function):
+		def wrapper(*args, **kwargs):
+			ts = time.clock()
+			function(*args, **kwargs)
+			te = time.clock()
+			debug(bpy.context.scene, "%s: %.2f\n" % (label, te-ts))
+		return wrapper
+	return real_decorator
