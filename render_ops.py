@@ -834,7 +834,7 @@ class VRAY_OT_create_proxy(bpy.types.Operator):
 				# Override settings
 				VRayMesh.override      = True
 				VRayMesh.override_type = 'VRAYPROXY'
-				GeomMeshFile.file = bpy.path.relpath(vrmesh_filepath)
+				GeomMeshFile.file = RelPath(vrmesh_filepath)
 
 				# Load preview mesh
 				if GeomMeshFile.mode == 'REPLACE':
@@ -884,7 +884,7 @@ class VRAY_OT_create_proxy(bpy.types.Operator):
 				VRayMesh.override_type= 'VRAYPROXY'
 
 				GeomMeshFile= VRayMesh.GeomMeshFile
-				GeomMeshFile.file= bpy.path.relpath(vrmesh_filepath)
+				GeomMeshFile.file= RelPath(vrmesh_filepath)
 
 		if len(bpy.context.selected_objects):
 			for ob in bpy.context.selected_objects:
