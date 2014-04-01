@@ -1346,3 +1346,12 @@ def TimeIt(label):
 			debug(bpy.context.scene, "%s: %.2f\n" % (label, te-ts))
 		return wrapper
 	return real_decorator
+
+
+def RelPath(filepath):
+	path = filepath
+	try:
+		path = bpy.path.relpath(filepath)
+	except ValueError:
+		pass
+	return path
