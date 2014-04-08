@@ -938,7 +938,7 @@ def WriteDefaults(bus):
 	bus['files']['materials'].write("\n}\n")
 
 
-def WriteFrame(bus, firstFrame=True, checkAnimated='NONE'):
+def WriteFrame(bus, firstFrame=True, checkAnimated=False):
 	if bus['preview']:
 		WritePreviewLights(bus)
 
@@ -950,7 +950,7 @@ def WriteFrame(bus, firstFrame=True, checkAnimated='NONE'):
 	def isAnimated(o):
 		if firstFrame:
 			return True
-		if checkAnimated in {'NONE'}:
+		if not checkAnimated:
 			return True
 		if o.animation_data and o.animation_data.action:
 			return True
@@ -1206,6 +1206,7 @@ def write_scene(bus):
 		lightsFile   = bus['files']['lights'],
 
 		scene = scene.as_pointer(),
+		useNodes = False
 	)
 
 	if bus['preview']:
@@ -1216,7 +1217,7 @@ def write_scene(bus):
 	debug(scene, "Writing scene...")
 
 	isAnimation   = VRayExporter.animation and VRayExporter.animation_type in {'FULL', 'NOTMESHES'}
-	checkAnimated = CHECK_ANIMATED[VRayExporter.check_animated]
+	checkAnimated = VRayExporter.check_animated
 
 	if VRayExporter.camera_loop:
 		isAnimation   = False
