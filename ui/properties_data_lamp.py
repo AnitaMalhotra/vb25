@@ -32,6 +32,18 @@ from vb25.utils import *
 from vb25.ui.ui import *
 
 
+def LampCouldBeVisible(lamp):
+	if lamp.type == 'AREA':
+		return True
+	if lamp.type == 'POINT':
+		if lamp.vray.radius:
+			return True
+		return False
+	if lamp.type == 'HEMI':
+		return True
+	return False
+
+
 class VRAY_DP_context_lamp(VRayLampPanel, bpy.types.Panel):
 	bl_label       = ""
 	bl_options     = {'HIDE_HEADER'}
@@ -110,7 +122,8 @@ class VRAY_DP_light(VRayLampPanel, bpy.types.Panel):
 			col= split.column()
 
 		col.prop(VRayLamp,'enabled', text="On")
-		col.prop(VRayLamp,'invisible')
+		if LampCouldBeVisible(lamp):
+			col.prop(VRayLamp,'invisible')
 		col.prop(VRayLamp,'affectDiffuse')
 		col.prop(VRayLamp,'affectSpecular')
 		col.prop(VRayLamp,'affectReflections')
