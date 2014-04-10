@@ -235,7 +235,7 @@ class VRAY_RP_render(VRayRenderPanel, bpy.types.Panel):
 		if VRayExporter.animation:
 			layout.separator()
 			layout.prop(VRayExporter, 'animation_type', text="Mode")
-			layout.prop(VRayExporter, 'check_animated', text="Check Updates")
+			layout.prop(VRayExporter, 'check_animated')
 			layout.separator()
 		else:
 			layout.prop(VRayExporter, 'auto_meshes', text="Re-Export Meshes")
