@@ -969,6 +969,7 @@ def write_lamp(bus):
 
 	if lamp_type == 'SunLight':
 		ofile.write("\n\tsky_model= %i;"%(SKY_MODEL[VRayLamp.sky_model]))
+		ofile.write("\n\tfilter_color=%s;" % a(scene, "Color(%.6f, %.6f, %.6f)"%(tuple(lamp.color))))
 	else:
 		if VRayLamp.color_type == 'RGB':
 			color= lamp.color

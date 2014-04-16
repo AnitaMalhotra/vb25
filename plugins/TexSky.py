@@ -53,6 +53,7 @@ PARAMS= (
 	#'up_vector',
 	'invisible',
 	'horiz_illum',
+	'filter_color',
 	'sky_model',
 	'sun'
 )
@@ -182,21 +183,28 @@ def write(bus):
 	TexSky= getattr(texture.vray, PLUG)
 
 	# Find Sun lamp
+	sun_ob   = None
 	sun_light= None
 	if TexSky.auto_sun:
 		for ob in [ob for ob in scene.objects if ob.type == 'LAMP']:
 			if ob.data.type == 'SUN' and ob.data.vray.direct_type == 'SUN':
+				sun_ob   = ob
 				sun_light= get_name(ob,prefix='LA')
 				break
 	else:
 		if TexSky.sun:
-			sun_light= get_name(get_data_by_name(scene, 'objects', TexSky.sun), prefix='LA')
+			sub_ob = get_data_by_name(scene, 'objects', TexSky.sun)
+			sun_light= get_name(sub_ob, prefix='LA')
 
 	# Write output
 	ofile.write("\n%s %s {"%(PLUG, tex_name))
 	for param in PARAMS:
 		if param == 'sky_model':
 			ofile.write("\n\t%s= %s;"%(param, SKY_MODEL[TexSky.sky_model]))
+		elif param == 'filter_color':
+			if sun_ob is None:
+				continue
+			ofile.write("\n\t%s= %s;"%(param, a(scene, sun_ob.data.color)))
 		elif param == 'sun':
 			if sun_light is None:
 				continue
