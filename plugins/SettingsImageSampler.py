@@ -69,17 +69,15 @@ def add_properties(rna_pointer):
 			progressive_minSubdivs = bpy.props.IntProperty(
 				name = "Min Subdivs",
 				description = "Min. subdivs value for the progressive image sampler",
-				min = 1,
-				max = 100,
+				min = 0,
 				default = 1
 			)
 
 			progressive_maxSubdivs = bpy.props.IntProperty(
 				name = "Max Subdivs",
 				description = "Max. subdivs value for the progressive image sampler",
-				min = 1,
-				max = 100,
-				default = 4
+				min = 0,
+				default = 100
 			)
 
 			progressive_threshold = bpy.props.FloatProperty(
