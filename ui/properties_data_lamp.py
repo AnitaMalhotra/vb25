@@ -93,7 +93,7 @@ class VRAY_DP_light(VRayLampPanel, bpy.types.Panel):
 
 		split= layout.split()
 		col= split.column()
-		if not ((lamp.type == 'SUN' and VRayLamp.direct_type == 'SUN') or (lamp.type == 'AREA' and VRayLamp.lightPortal != 'NORMAL')):
+		if not (lamp.type == 'AREA' and VRayLamp.lightPortal != 'NORMAL'):
 			col.row().prop(VRayLamp, 'color_type', expand=True)
 			if wide_ui:
 				col= split.column()
