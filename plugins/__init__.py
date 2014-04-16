@@ -455,7 +455,7 @@ def add_properties():
 			soft_min= 0.0,
 			soft_max= 1.0,
 			precision= 3,
-			default= 0.0
+			default= 0.02
 		)
 
 		shadowSubdivs= IntProperty(
