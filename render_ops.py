@@ -721,11 +721,15 @@ def LoadProxyMeshToObject(ob, filepath, anim_type, anim_offset, anim_speed, anim
 	if meshData is None:
 		return "Can't find preview voxel!"
 
+	vertices = meshData['vertices']
+	faces    = meshData['faces']
+	uvs      = meshData['uv_sets']
+
 	meshName = bpy.path.clean_name(os.path.basename(filepath))
 
 	# Add new mesh
 	mesh = bpy.data.meshes.new(meshName)
-	mesh.from_pydata(meshData['vertices'], [], meshData['faces'])
+	mesh.from_pydata(vertices, [], faces)
 	mesh.update()
 
 	# Replace object's mesh
@@ -733,6 +737,14 @@ def LoadProxyMeshToObject(ob, filepath, anim_type, anim_offset, anim_speed, anim
 	bm.from_mesh(mesh)
 	bm.to_mesh(ob.data)
 	ob.data.update()
+
+	if uvs:
+		for uvName in uvs:
+			bpy.ops.mesh.uv_texture_add()
+
+			index = ob.data.uv_layers.active_index
+			uvLayer = ob.data.uv_layers[index]
+			uvLayer.name = uvName
 
 	# Remove temp
 	bm.free()
