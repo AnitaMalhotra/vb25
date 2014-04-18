@@ -226,7 +226,7 @@ def write(bus):
 			
 		ofile.write("\n\tview=%s;" % p(CHANEL[StereoSettings.view]))	
 		ofile.write("\n\tsm_mode=%s;" % p(SM_MODE[StereoSettings.sm_mode]))
-		ofile.write("\n\tadjust_resolution=%s;" % p(StereoSettings.adjust_resolution))
+		# ofile.write("\n\tadjust_resolution=%s;" % p(StereoSettings.adjust_resolution))
 		ofile.write("\n\tshademap_file=\"%s\";" % path_sep_to_unix(bpy.path.abspath(StereoSettings.shademap_file)))
 		ofile.write("\n\treuse_threshold=%s;" % p(StereoSettings.reuse_threshold))
 		#ofile.write("\n\texclude_list=%s;" % p(StereoSettings.exclude_list))
@@ -266,7 +266,7 @@ class VRAY_RP_VRayStereoscopicSettings(ui.VRayRenderPanel, bpy.types.Panel):
 		col.prop(VRayStereoscopicSettings, 'focus_method', text="Focus")
 		col.prop(VRayStereoscopicSettings, 'interocular_method', text="Interocular")
 		col.prop(VRayStereoscopicSettings, 'view')
-		col.prop(VRayStereoscopicSettings, 'adjust_resolution')
+		# col.prop(VRayStereoscopicSettings, 'adjust_resolution')
 
 		layout.separator()
 		layout.prop(VRayStereoscopicSettings, 'shademap_file', text="Shademap")

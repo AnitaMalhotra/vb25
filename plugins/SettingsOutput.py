@@ -156,8 +156,13 @@ def write(bus):
 	VRayDR=         VRayScene.VRayDR
 	SettingsOutput= VRayScene.SettingsOutput
 
+	StereoSettings = VRayScene.VRayStereoscopicSettings
+
 	wx= int(scene.render.resolution_x * scene.render.resolution_percentage * 0.01)
 	wy= int(scene.render.resolution_y * scene.render.resolution_percentage * 0.01)
+
+	if StereoSettings.use:
+		wx *= 2
 
 	ofile.write("\nSettingsOutput SettingsOutput {")
 	if VRayExporter.auto_save_render:

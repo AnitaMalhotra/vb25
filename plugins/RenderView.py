@@ -79,22 +79,29 @@ def write(bus):
 	RenderView     = VRayScene.RenderView
 	SettingsCamera = VRayCamera.SettingsCamera
 
-	if not VRayBake.use:
-		fov, orthoWidth = get_camera_fov(scene, camera)
+	StereoSettings     = VRayScene.VRayStereoscopicSettings
+	CameraStereoscopic = VRayCamera.CameraStereoscopic
 
-		tm = camera.matrix_world.normalized()
+	if VRayBake.use:
+		return
+	if CameraStereoscopic.use and StereoSettings.use:
+		return
 
-		ofile.write("\n// Camera: %s" % (camera.name))
-		ofile.write("\nRenderView CameraView {")
-		ofile.write("\n\ttransform=%s;" % a(scene, transform(tm)))
-		ofile.write("\n\tfov=%s;" % a(scene, fov))
-		if SettingsCamera.type not in ('SPHERIFICAL','BOX'):
-			ofile.write("\n\tclipping=%i;" % (RenderView.clip_near or RenderView.clip_far))
-			if RenderView.clip_near:
-				ofile.write("\n\tclipping_near=%s;" % a(scene, camera.data.clip_start))
-			if RenderView.clip_far:
-				ofile.write("\n\tclipping_far=%s;" % a(scene, camera.data.clip_end))
-		if camera.data.type == 'ORTHO':
-			ofile.write("\n\torthographic=1;")
-			ofile.write("\n\torthographicWidth=%s;" % a(scene, orthoWidth))
-		ofile.write("\n}\n")
+	fov, orthoWidth = get_camera_fov(scene, camera)
+
+	tm = camera.matrix_world.normalized()
+
+	ofile.write("\n// Camera: %s" % (camera.name))
+	ofile.write("\nRenderView CameraView {")
+	ofile.write("\n\ttransform=%s;" % a(scene, transform(tm)))
+	ofile.write("\n\tfov=%s;" % a(scene, fov))
+	if SettingsCamera.type not in ('SPHERIFICAL','BOX'):
+		ofile.write("\n\tclipping=%i;" % (RenderView.clip_near or RenderView.clip_far))
+		if RenderView.clip_near:
+			ofile.write("\n\tclipping_near=%s;" % a(scene, camera.data.clip_start))
+		if RenderView.clip_far:
+			ofile.write("\n\tclipping_far=%s;" % a(scene, camera.data.clip_end))
+	if camera.data.type == 'ORTHO':
+		ofile.write("\n\torthographic=1;")
+		ofile.write("\n\torthographicWidth=%s;" % a(scene, orthoWidth))
+	ofile.write("\n}\n")

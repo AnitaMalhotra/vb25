@@ -257,23 +257,35 @@ def write(bus):
 
 	VRayScene      = scene.vray
 	StereoSettings = VRayScene.VRayStereoscopicSettings
-	
+	RenderView     = VRayScene.RenderView
+
 	VRayCamera = camera.data.vray
 	CameraStereoscopic = VRayCamera.CameraStereoscopic
+	SettingsCamera     = VRayCamera.SettingsCamera
 
 	if CameraStereoscopic.use and StereoSettings.use:
+		def _writeCam(camera, tm):
+			fov, orthoWidth = get_camera_fov(scene, camera)
+			tm = tm.normalized()
+			ofile.write("\nRenderView %s {" % clean_string(camera.name))
+			ofile.write("\n\ttransform=%s;" % a(scene, transform(tm)))
+			ofile.write("\n\tfov=%s;" % a(scene, fov))
+			if SettingsCamera.type not in {'SPHERIFICAL', 'BOX'}:
+				ofile.write("\n\tclipping=%i;" % (RenderView.clip_near or RenderView.clip_far))
+				if RenderView.clip_near:
+					ofile.write("\n\tclipping_near=%s;" % a(scene, camera.data.clip_start))
+				if RenderView.clip_far:
+					ofile.write("\n\tclipping_far=%s;" % a(scene, camera.data.clip_end))
+			if camera.data.type == 'ORTHO':
+				ofile.write("\n\torthographic=1;")
+				ofile.write("\n\torthographicWidth=%s;" % a(scene, orthoWidth))
+			ofile.write("\n}\n")
+
 		camera_left  = bpy.data.objects.get(CameraStereoscopic.LeftCam)
 		camera_right = bpy.data.objects.get(CameraStereoscopic.RightCam)
 
-		ofile.write("\n\n// Camera Left: %s" % (clean_string(camera_left.name)))
-		ofile.write("\nRenderView %s {" % (clean_string(camera_left.name)))
-		ofile.write("\n\ttransform=%s;" % a(scene, transform(matrix_recalc(bus, camera_left, "left"))))
-		ofile.write("\n}\n")
-
-		ofile.write("\n\n// Camera Right: %s" % (clean_string(camera_right.name)))
-		ofile.write("\nRenderView %s {" % (clean_string(camera_right.name)))
-		ofile.write("\n\ttransform=%s;" % a(scene, transform(matrix_recalc(bus, camera_right, "right"))))
-		ofile.write("\n}\n")
+		_writeCam(camera_left,  matrix_recalc(bus, camera_left,  "left"))
+		_writeCam(camera_right, matrix_recalc(bus, camera_right, "right"))
 
 
 def matrix_recalc(bus, cam, pos):
