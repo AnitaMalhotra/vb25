@@ -102,6 +102,12 @@ def add_properties(parent_struct):
 		default= 32
 	)
 
+	SettingsRegionsGenerator.dynbuckets = BoolProperty(
+		name    = "Dynamic Buckets",
+		default = True
+	)
+
+
 
 def write(bus):
 	ofile=  bus['files']['scene']
@@ -133,4 +139,5 @@ def write(bus):
 	ofile.write("\n\treverse= %i;" % SettingsRegionsGenerator.reverse)
 	ofile.write("\n\tseqtype= %i;" % SEQTYPE[SettingsRegionsGenerator.seqtype])
 	ofile.write("\n\txymeans= %i;" % XYMEANS[SettingsRegionsGenerator.xymeans])
+	ofile.write("\n\tdynbuckets= %i;" % SettingsRegionsGenerator.dynbuckets)
 	ofile.write("\n}\n")
