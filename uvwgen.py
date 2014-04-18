@@ -116,7 +116,10 @@ def write_UVWGenChannel(bus):
 	if bus['preview'] or not VRaySlot.uv_layer:
 		ofile.write('\n\tuvw_channel=0;')
 	else:
-		ofile.write('\n\tuv_set_name="%s";' % VRaySlot.uv_layer)
+		if VRaySlot.uv_layer.isdigit():
+			ofile.write('\n\tuvw_channel=%s;' % VRaySlot.uv_layer)
+		else:
+			ofile.write('\n\tuv_set_name="%s";' % VRaySlot.uv_layer)
 	ofile.write("\n\ttranslate_frame_u=%.3f;" % VRaySlot.offset[0])
 	ofile.write("\n\ttranslate_frame_v=%.3f;" % VRaySlot.offset[1])
 	ofile.write("\n\tcoverage_u=%.3f;" % VRaySlot.scale[0])
