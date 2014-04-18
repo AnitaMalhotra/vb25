@@ -1251,6 +1251,7 @@ class VRAY_RP_SettingsSystem(VRayRenderPanel, bpy.types.Panel):
 		sub.active= not SettingsRegionsGenerator.lock_size
 		sub.prop(SettingsRegionsGenerator, 'yc')
 		col.prop(SettingsRegionsGenerator, 'lock_size')
+		col.prop(SettingsRegionsGenerator, 'dynbuckets')
 
 		layout.separator()
 		layout.prop(VRayExporter, 'verboseLevel')
